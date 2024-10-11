@@ -1,0 +1,20 @@
+<div class="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center z-50" *ngIf="message">
+  <div class="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full relative">
+    <!-- Botón de cerrar con ícono -->
+    <button class="absolute top-2 right-2 text-gray-500 hover:text-gray-700" (click)="onClose()">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="w-6 h-6">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+      </svg>
+    </button>
+
+    <!-- Imagen de error -->
+    <div class="flex justify-center mb-4">
+      <img src="assets/img/error-icon.png" alt="Error" class="w-12 h-12">
+    </div>
+
+    <!-- Mensaje de alerta -->
+    <div class="text-center">
+      <p class="text-red-600 font-bold text-lg">{{ message }}</p>
+    </div>
+  </div>
+</div>
