@@ -1,6 +1,8 @@
 import { Component } from '@angular/core';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
 import { UsuarioService } from '../../services/usuario.service';
+import { Router } from '@angular/router';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-login',
@@ -15,11 +17,16 @@ export class LoginComponent {
     email: new FormControl('', [Validators.required, Validators.email]),
     password: new FormControl('', [
       Validators.required,
-      Validators.minLength(6),
+      Validators.minLength(3),
     ]),
   });
 
-  constructor(private usuarioService: UsuarioService) {}
+  constructor(
+    private usuarioService: UsuarioService,
+    private router: Router,
+    private authService: AuthService
+  ) {}
+
   login() {
     if (this.loginForm.valid) {
       const email = this.loginForm.value.email;
@@ -29,6 +36,22 @@ export class LoginComponent {
         (response: any) => {
           console.log('Login exitoso:', response);
           this.errorMessage = null; // Limpiar el mensaje de error si el login es exitoso
+
+          // Guardar el JWT y la información del usuario
+          this.authService.setToken(response.jwt);
+          this.authService.setUser(response.usuario);
+
+          // Obtener el rol del usuario
+          const userRole = this.authService.getUserRole();
+
+          // Redirigir al dashboard correspondiente según el rol del usuario
+          if (userRole === 'ADMIN') {
+            // this.router.navigate(['/admin-dashboard']);
+          } else if (userRole === 'CLIENTE') {
+            this.router.navigate(['/dashboard-cliente/inicio']);
+          } else {
+            this.errorMessage = 'Rol desconocido.';
+          }
         },
         (error: any) => {
           // Si el código de estado es 500, mostrar mensaje genérico
@@ -53,7 +76,6 @@ export class LoginComponent {
       );
     }
   }
-
   closeAlert() {
     this.errorMessage = null;
   }

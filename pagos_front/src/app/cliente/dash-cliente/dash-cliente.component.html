@@ -1,0 +1,42 @@
+<div class="min-h-screen flex flex-col lg:flex-row">
+    <!-- Menú lateral -->
+    <div class="flex flex-col w-full lg:w-64 bg-gray-200 text-gray-900">
+        <div class="flex items-center justify-center h-16 bg-gray-300 text-lg font-bold space-x-2">
+            <!-- Imagen del logo -->
+            <img src="img/logo_no_fondo.png" alt="PayFlow" class="h-20 w-auto" />
+            <span>Cliente</span>
+        </div>
+        <nav class="flex-1 px-2 py-4 space-y-1">
+            <!-- Enlace a Inicio -->
+            <a routerLink="/dashboard-cliente/inicio"
+                class="group flex items-center px-2 py-2 text-sm font-medium rounded-md hover:bg-gray-300 hover:text-gray-900">
+                <fa-icon [icon]="['fas', 'home']"
+                    class="h-6 w-6 mr-3 text-gray-500 group-hover:text-gray-700"></fa-icon>
+                Inicio
+            </a>
+
+
+            <!-- Enlace a Estadísticas -->
+            <a href="#"
+                class="group flex items-center px-2 py-2 text-sm font-medium rounded-md hover:bg-gray-300 hover:text-gray-900">
+                <fa-icon [icon]="['fas', 'chart-line']"
+                    class="h-6 w-6 mr-3 text-gray-500 group-hover:text-gray-700"></fa-icon>
+                Ingresos y Egresos
+            </a>
+
+            <!-- Enlace a Perfil -->
+            <a href="#"
+                class="group flex items-center px-2 py-2 text-sm font-medium rounded-md hover:bg-gray-300 hover:text-gray-900">
+                <fa-icon [icon]="['fas', 'user']"
+                    class="h-6 w-6 mr-3 text-gray-500 group-hover:text-gray-700"></fa-icon>
+                Perfil
+            </a>
+        </nav>
+    </div>
+
+    <!-- Contenido principal -->
+    <div class="flex-1 p-10">
+        <!-- Aquí puedes añadir más contenido o componentes -->
+        <router-outlet></router-outlet>
+    </div>
+</div>
