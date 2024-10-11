@@ -1,0 +1,88 @@
+<div class="min-h-screen bg-gray-100 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+  <div class="max-w-6xl w-full grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+
+    <!-- Logo que aparece solo en pantallas pequeñas -->
+    <div class="lg:hidden flex justify-center mb-6">
+      <img class="w-full max-w-xs sm:max-w-md" src="img/logo_no_fondo.png" alt="PayFlow">
+    </div>
+
+    <!-- Sección del logo a la izquierda (visible en pantallas grandes) -->
+    <div class="hidden lg:flex justify-center">
+      <img class="w-full max-w-xs sm:max-w-md md:max-w-lg lg:max-w-xl xl:max-w-2xl" src="img/logo_no_fondo.png"
+        alt="PayFlow">
+    </div>
+
+    <!-- Sección del formulario -->
+    <div class="bg-white shadow-lg rounded-lg p-8 lg:p-12">
+      <div>
+        <!-- Título del formulario -->
+        <h2 class="text-center text-3xl font-extrabold text-gray-900">Inicia sesión en tu cuenta</h2>
+        <p class="mt-2 text-center text-sm text-gray-600">
+          O
+          <a href="#" class="font-medium text-indigo-600 hover:text-indigo-500"> ¿No tienes cuenta? </a>
+        </p>
+      </div>
+
+      <!-- Formulario reactivo -->
+      <form class="mt-8 space-y-6" [formGroup]="loginForm" (ngSubmit)="login()">
+        <input type="hidden" name="remember" value="true">
+
+        <!-- Campo de texto para el correo electrónico -->
+        <div class="space-y-4">
+          <div>
+            <label for="email-address" class="sr-only">Correo Electrónico</label>
+            <input id="email-address" formControlName="email" name="email" type="email" autocomplete="email" required
+              class="appearance-none block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              placeholder="Correo Electrónico">
+            <!-- Mensaje de error para el correo -->
+            <div *ngIf="loginForm.get('email')?.invalid && loginForm.get('email')?.touched" class="text-red-600">
+              El correo es requerido y debe ser válido.
+            </div>
+          </div>
+
+          <!-- Campo de texto para la contraseña -->
+          <div>
+            <label for="password" class="sr-only">Contraseña</label>
+            <input id="password" formControlName="password" name="password" type="password"
+              autocomplete="current-password" required
+              class="appearance-none block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              placeholder="Contraseña">
+            <!-- Mensaje de error para la contraseña -->
+            <div *ngIf="loginForm.get('password')?.invalid && loginForm.get('password')?.touched" class="text-red-600">
+              La contraseña es requerida y debe tener al menos 6 caracteres.
+            </div>
+          </div>
+        </div>
+
+        <!-- Enlace para el olvido de la contraseña -->
+        <div class="flex items-center justify-end">
+          <div class="text-sm">
+            <a href="#" class="font-medium text-indigo-600 hover:text-indigo-500"> ¿Olvidaste tu contraseña? </a>
+          </div>
+        </div>
+
+        <!-- Botón de inicio de sesión -->
+        <div>
+          <button type="submit"
+            class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-gray-400 disabled:cursor-not-allowed disabled:opacity-50"
+            [disabled]="loginForm.invalid">
+            <span class="absolute left-0 inset-y-0 flex items-center pl-3">
+              <svg class="h-7 w-7 text-white group-hover:text-gray-200" xmlns="http://www.w3.org/2000/svg" fill="none"
+                viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M16 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2M12 11a4 4 0 100-8 4 4 0 000 8zm8 6v-2a4 4 0 00-3-3.87" />
+              </svg>
+            </span>
+            Iniciar Sesión
+          </button>
+        </div>
+
+
+      </form>
+
+      <!-- Componente de alerta -->
+      <app-error-alert [message]="errorMessage" (close)="closeAlert()"></app-error-alert>
+    </div>
+
+  </div>
+</div>
