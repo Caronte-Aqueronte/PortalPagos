@@ -7,11 +7,11 @@ import {
 } from '@angular/core';
 
 @Component({
-  selector: 'app-error-alert',
-  templateUrl: './error-alert.component.html',
-  styleUrl: './error-alert.component.css',
+  selector: 'app-success-alert',
+  templateUrl: './success-alert.component.html',
+  styleUrl: './success-alert.component.css',
 })
-export class ErrorAlertComponent {
+export class SuccessAlertComponent {
   @Input() message: string | null = null; // Mensaje a mostrar en el pop-up
   @Output() close = new EventEmitter<void>(); // Evento para cerrar el pop-up
 

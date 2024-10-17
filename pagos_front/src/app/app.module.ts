@@ -12,7 +12,12 @@ import { DashClienteComponent } from './cliente/dash-cliente/dash-cliente.compon
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { FaIconLibrary } from '@fortawesome/angular-fontawesome';
 import { fas } from '@fortawesome/free-solid-svg-icons';
-import { InicioClientePageComponent } from './cliente/inicio-cliente-page/inicio-cliente-page.component'; // Importar los iconos sólidos
+import { InicioClientePageComponent } from './cliente/inicio-cliente-page/inicio-cliente-page.component';
+import { MiPerfilClienteComponent } from './cliente/perfil/mi-perfil-cliente/mi-perfil-cliente.component';
+import { CentroCuentasComponent } from './cliente/perfil/centro-cuentas/centro-cuentas.component';
+import { EliminarCuentaClienteComponent } from './cliente/perfil/eliminar-cuenta-cliente/eliminar-cuenta-cliente.component';
+import { InfoComponent } from './cliente/perfil/info/info.component';
+import { SuccessAlertComponent } from './alerts/success-alert/success-alert.component';
 
 @NgModule({
   declarations: [
@@ -21,6 +26,11 @@ import { InicioClientePageComponent } from './cliente/inicio-cliente-page/inicio
     ErrorAlertComponent,
     DashClienteComponent,
     InicioClientePageComponent,
+    MiPerfilClienteComponent,
+    CentroCuentasComponent,
+    EliminarCuentaClienteComponent,
+    InfoComponent,
+    SuccessAlertComponent,
   ],
   imports: [
     BrowserModule,

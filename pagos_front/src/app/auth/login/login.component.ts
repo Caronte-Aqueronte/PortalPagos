@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
 import { UsuarioService } from '../../services/usuario.service';
 import { Router } from '@angular/router';
@@ -9,7 +9,7 @@ import { AuthService } from '../../services/auth.service';
   templateUrl: './login.component.html',
   styleUrl: './login.component.css',
 })
-export class LoginComponent {
+export class LoginComponent implements OnInit {
   errorMessage: string | null = null;
 
   // Definir el formulario reactivo
@@ -21,11 +21,18 @@ export class LoginComponent {
     ]),
   });
 
+  ngOnInit(): void {
+    this.authService.logout();
+  }
+
   constructor(
     private usuarioService: UsuarioService,
     private router: Router,
     private authService: AuthService
-  ) {}
+  ) {
+
+
+  }
 
   login() {
     if (this.loginForm.valid) {
