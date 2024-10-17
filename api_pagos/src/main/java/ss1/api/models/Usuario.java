@@ -5,14 +5,20 @@
 package ss1.api.models;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
+import java.util.List;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.DynamicUpdate;
 
 /**
@@ -93,6 +99,45 @@ public class Usuario extends Auditor {
     private Rol rol;
 
     /**
+     * El saldo asociado al usuario. La relación es uno a uno, donde un usuario
+     * puede tener solo un saldo. El campo {@code saldo} se almacena usando la
+     * columna "saldo" en la tabla.
+     */
+    @OneToOne(cascade = CascadeType.ALL) // Cascada ALL para que al guardar el Usuario también se guarde el Perfil.
+    @JoinColumn(name = "saldo")
+    private Saldo saldo;
+
+    /**
+     * Los movimientos asociados al usuario. La relación es uno a muchos, donde
+     * un usuario puede tener varios movimientos.
+     */
+    @OneToMany(mappedBy = "usuario", orphanRemoval = true)
+    @Cascade(org.hibernate.annotations.CascadeType.ALL)
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    @Schema(hidden = true)
+    private List<Movimiento> movimientos;
+
+    /**
+     * Los movimientos asociados al usuario. La relación es uno a muchos, donde
+     * un usuario puede tener varios movimientos.
+     */
+    @OneToMany(mappedBy = "usuario", orphanRemoval = true)
+    @Cascade(org.hibernate.annotations.CascadeType.ALL)
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    @Schema(hidden = true)
+    private List<MovilizacionFondos> retirosEfectivo;
+
+    /**
+     * Las transacciones fallidas asociadas al usuario. La relación es uno a
+     * muchos, donde un usuario puede tener varios fallos.
+     */
+    @OneToMany(mappedBy = "usuario", orphanRemoval = true)
+    @Cascade(org.hibernate.annotations.CascadeType.ALL)
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    @Schema(hidden = true)
+    private List<TransaccionFallida> transaccionesFallidas;
+
+    /**
      * Constructor para inicializar un objeto Usuario con todos los atributos.
      *
      * @param nit el NIT del usuario
@@ -109,6 +154,10 @@ public class Usuario extends Auditor {
         this.apellidos = apellidos;
         this.password = password;
         this.rol = rol;
+    }
+
+    public Usuario(Long id) {
+        super(id);
     }
 
     /**
@@ -224,4 +273,75 @@ public class Usuario extends Auditor {
     public void setRol(Rol rol) {
         this.rol = rol;
     }
+
+    /**
+     * Obtiene el saldo asociado al usuario.
+     *
+     * @return el saldo del usuario
+     */
+    public Saldo getSaldo() {
+        return saldo;
+    }
+
+    /**
+     * Establece el saldo asociado al usuario.
+     *
+     * @param rol el rol a establecer
+     */
+    public void setSaldo(Saldo saldo) {
+        this.saldo = saldo;
+    }
+
+    /**
+     * Obtiene la lista de movimientos asociados a la cuenta del usuario.
+     *
+     * @return Una lista de objetos de tipo Movimiento que representan los
+     * ingresos y egresos realizados en la cuenta del usuario.
+     */
+    public List<Movimiento> getMovimientos() {
+        return movimientos;
+    }
+
+    /**
+     * Establece la lista de movimientos asociados a la cuenta del usuario.
+     *
+     * @param movimientos Una lista de objetos de tipo Movimiento que representa
+     * los ingresos y egresos realizados en la cuenta.
+     */
+    public void setMovimientos(List<Movimiento> movimientos) {
+        this.movimientos = movimientos;
+    }
+
+    /**
+     * Obtiene la lista de retiros de efectivo (movilizaciones de fondos)
+     * realizados por el usuario desde la cuenta del portal de pagos hacia una
+     * cuenta bancaria o tarjeta de crédito.
+     *
+     * @return Una lista de objetos de tipo MovilizacionFondos que representan
+     * los retiros de efectivo realizados.
+     */
+    public List<MovilizacionFondos> getRetirosEfectivo() {
+        return retirosEfectivo;
+    }
+
+    /**
+     * Establece la lista de retiros de efectivo (movilizaciones de fondos)
+     * realizados por el usuario desde la cuenta del portal de pagos hacia una
+     * cuenta bancaria o tarjeta de crédito.
+     *
+     * @param retirosEfectivo Una lista de objetos de tipo MovilizacionFondos
+     * que representa los retiros de efectivo realizados por el usuario.
+     */
+    public void setRetirosEfectivo(List<MovilizacionFondos> retirosEfectivo) {
+        this.retirosEfectivo = retirosEfectivo;
+    }
+
+    public List<TransaccionFallida> getTransaccionesFallidas() {
+        return transaccionesFallidas;
+    }
+
+    public void setTransaccionesFallidas(List<TransaccionFallida> transaccionesFallidas) {
+        this.transaccionesFallidas = transaccionesFallidas;
+    }
+
 }

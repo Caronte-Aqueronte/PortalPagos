@@ -4,11 +4,14 @@
  */
 package ss1.api.services;
 
+import java.time.LocalDateTime;
 import javax.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import ss1.api.excepciones.BadRequestException;
@@ -18,6 +21,8 @@ import ss1.api.excepciones.UnauthorizedException;
 import ss1.api.models.Rol;
 import ss1.api.models.dto.LoginDTO;
 import ss1.api.models.Usuario;
+import ss1.api.models.request.EditarPasswordRequest;
+import ss1.api.models.request.EditarPerfilRequest;
 import ss1.api.models.request.LoginRequest;
 import ss1.api.repositories.RolRepository;
 import ss1.api.repositories.UsuarioRepository;
@@ -47,6 +52,8 @@ public class UsuarioService extends ss1.api.services.Service {
     private Encriptador encriptador;
     @Autowired
     private RolRepository rolRepository;
+    @Autowired
+    private SaldoService saldoService;
 
     /**
      * Inicia la sesión de un usuario autenticándolo con su email y contraseña.
@@ -148,6 +155,51 @@ public class UsuarioService extends ss1.api.services.Service {
         return new LoginDTO(usuarioCreado, jwt);
     }
 
+    public Usuario getUsuarioById(Usuario usuarioId) throws BadRequestException, NotFoundException {
+        // Validar el modelo (esto asume que tienes un método para validar el modelo)
+        validarId(usuarioId, "Id del usuario invalido");
+        return this.usuarioRepository.findById(usuarioId.getId()).orElseThrow(() -> new NotFoundException("Usuario no encontrado."));
+    }
+
+    /**
+     * Elimina el usuario autenticado del sistema, si y solo si no tiene saldo
+     * disponible en su cuenta.
+     *
+     * Este método valida que el usuario esté autenticado y que el usuario a
+     * eliminar sea el mismo usuario autenticado. Antes de proceder con la
+     * eliminación, también verifica que el usuario no tenga saldo en su cuenta.
+     *
+     * Excepciones: - {@link BadRequestException}: Se lanza si hay un problema
+     * con la solicitud. - {@link ConflictException}: Se lanza si el usuario
+     * tiene saldo en su cuenta y no puede ser eliminado. -
+     * {@link NotFoundException}: Se lanza si el usuario no es encontrado en el
+     * sistema. - {@link UnauthorizedException}: Se lanza si el usuario
+     * autenticado no tiene los permisos necesarios para realizar esta
+     * operación.
+     *
+     * @param usuarioEliminar El objeto Usuario que contiene los datos del
+     * usuario que se intenta eliminar.
+     * @return Un mensaje que indica que el usuario ha sido eliminado
+     * exitosamente.
+     * @throws BadRequestException Si hay algún problema en la solicitud o datos
+     * inválidos.
+     * @throws ConflictException Si el usuario tiene saldo disponible en su
+     * cuenta.
+     * @throws NotFoundException Si el usuario a eliminar no existe.
+     * @throws UnauthorizedException Si el usuario autenticado no tiene
+     * autorización para realizar esta operación.
+     */
+    public String eliminarUsuario(Usuario usuarioEliminar) throws BadRequestException, ConflictException, NotFoundException, UnauthorizedException {
+        // Obtener la información del usuario autenticado desde el contexto de seguridad
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String emailUsuarioAutenticado = authentication.getName();
+        // Obtener el usuario que se intenta eliminar
+        Usuario usuario = this.getUsuarioById(usuarioEliminar);
+        // Verificar que el usuario autenticado coincide con el usuario que se intenta eliminar
+        this.verificarUsuarioJwt(usuario, emailUsuarioAutenticado);
+        return this.eliminarUsuarioAbs(usuarioEliminar);
+    }
+
     /**
      * Crea un nuevo usuario en el sistema después de validar los datos
      * proporcionados.
@@ -184,5 +236,72 @@ public class UsuarioService extends ss1.api.services.Service {
         usuario.setPassword(this.encriptador.encriptar(usuario.getPassword()));
         // Guardar el usuario
         return this.usuarioRepository.save(usuario);
+    }
+
+    public Usuario getMiUsuario(Long id) throws BadRequestException, ConflictException, NotFoundException, UnauthorizedException {
+        //traer el usuario por id
+        Usuario usuario = this.getUsuarioById(new Usuario(id));
+        // Obtener la información del usuario autenticado desde el contexto de seguridad
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String emailUsuarioAutenticado = authentication.getName();
+        // Verificar que el usuario autenticado coincide con el usuario que se intenta eliminar
+        this.verificarUsuarioJwt(usuario, emailUsuarioAutenticado);
+        return usuario;
+    }
+
+    public Usuario editarPassword(EditarPasswordRequest usuarioEditar) throws BadRequestException,
+            NotFoundException, UnauthorizedException {
+        //validamos el objeto
+        this.validarModelo(usuarioEditar);
+        //traer el usuario por id
+        Usuario usuario = this.getUsuarioById(new Usuario(usuarioEditar.getId()));
+        // Obtener la información del usuario autenticado desde el contexto de seguridad
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String emailUsuarioAutenticado = authentication.getName();
+        // Verificar que el usuario autenticado coincide con el usuario que se intenta eliminar
+        this.verificarUsuarioJwt(usuario, emailUsuarioAutenticado);
+        //si tiene permisos entonces comparamos si la password que ingreso el cliente es la misma que esta en la bd
+        boolean compararPassword = this.encriptador.compararPassword(usuarioEditar.getOldPassword(), usuario.getPassword());
+        if (!compararPassword) {
+            throw new UnauthorizedException("Password incorrecta.");
+        }
+        // Encriptar la contraseña
+        usuario.setPassword(this.encriptador.encriptar(usuarioEditar.getNewPassword()));
+        return this.usuarioRepository.save(usuario);
+    }
+
+    public Usuario editarPerfil(EditarPerfilRequest usuarioEditar) throws BadRequestException,
+            NotFoundException, UnauthorizedException {
+        //validamos el objeto
+        this.validarModelo(usuarioEditar);
+        //traer el usuario por id
+        Usuario usuario = this.getUsuarioById(new Usuario(usuarioEditar.getId()));
+        // Obtener la información del usuario autenticado desde el contexto de seguridad
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String emailUsuarioAutenticado = authentication.getName();
+        // Verificar que el usuario autenticado coincide con el usuario que se intenta eliminar
+        this.verificarUsuarioJwt(usuario, emailUsuarioAutenticado);
+        //si tiene permisos entonces debemos editar la informacion
+
+        usuario.setNit(usuarioEditar.getNit());
+        usuario.setNombres(usuarioEditar.getNombres());
+        usuario.setApellidos(usuarioEditar.getApellidos());
+
+        return this.usuarioRepository.save(usuario);
+    }
+
+    private String eliminarUsuarioAbs(Usuario usuarioEliminar) throws BadRequestException, ConflictException, NotFoundException, UnauthorizedException {
+        //traer el usuario por id
+        Usuario usuario = this.getUsuarioById(usuarioEliminar);
+
+        //verificar que no tenga fondos el usuario
+        if (this.saldoService.usuarioTieneSaldo(usuario) == true) {
+            throw new ConflictException("El usuario tiene saldo disponible en su cuenta, no se puede eliminar.");
+        }
+        //eliminar el usuario
+        usuario.setDeleted(true);
+        usuario.setDeletedAt(LocalDateTime.now());
+        usuarioRepository.save(usuario);
+        return "Usuario eliminado con exito.";
     }
 }

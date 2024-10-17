@@ -4,6 +4,8 @@
  */
 package ss1.api.services;
 
+import ss1.api.excepciones.UnauthorizedException;
+import ss1.api.models.Usuario;
 import ss1.api.services.tools.Validador;
 
 /**
@@ -13,4 +15,12 @@ import ss1.api.services.tools.Validador;
 @org.springframework.stereotype.Service
 public class Service extends Validador {
 
+    protected boolean verificarUsuarioJwt(Usuario usuarioTratar, String emailUsuarioAutenticado) throws UnauthorizedException {
+        // validar si el usuario tiene permiso de eliminar
+        if (!emailUsuarioAutenticado.equals(usuarioTratar.getEmail())
+                && !isUserAdmin(emailUsuarioAutenticado)) {
+            throw new UnauthorizedException("No tienes permiso para realizar acciones a este usuario.");
+        }
+        return true;
+    }
 }
