@@ -8,6 +8,7 @@ import java.util.Set;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
 import ss1.api.excepciones.BadRequestException;
@@ -105,5 +106,10 @@ public class Validador {
         if (entidad.getDeletedAt() != null) {
             throw new NotFoundException("Informacion no encontrada.");
         }
+    }
+
+    public boolean isUserAdmin(String email) {
+        UserDetails userDetails = userDetailsService.loadUserByUsername(email);
+        return userDetails.getAuthorities().stream().anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN"));
     }
 }

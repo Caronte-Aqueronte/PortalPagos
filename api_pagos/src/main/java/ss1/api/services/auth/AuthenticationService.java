@@ -29,7 +29,8 @@ public class AuthenticationService implements UserDetailsService {
                 () -> new UsernameNotFoundException("Usuario no encontrado")
         );
         User.UserBuilder userBuilder = User.withUsername(username);
-        userBuilder.password(usuario.getPassword()).roles();
+        userBuilder.password(usuario.getPassword()).roles(
+                usuario.getRol().getNombre());
         return userBuilder.build();
     }
 }
