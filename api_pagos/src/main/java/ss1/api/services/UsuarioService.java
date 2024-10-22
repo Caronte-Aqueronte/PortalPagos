@@ -161,12 +161,6 @@ public class UsuarioService extends ss1.api.services.Service {
         return this.usuarioRepository.findById(usuarioId.getId()).orElseThrow(() -> new NotFoundException("Usuario no encontrado."));
     }
 
-    public Usuario getUsuarioById(Usuario usuarioEmail) throws BadRequestException, NotFoundException {
-        // Validar el modelo (esto asume que tienes un método para validar el modelo)
-        validarId(usuarioId, "Id del usuario invalido");
-        return this.usuarioRepository.findById(usuarioId.getId()).orElseThrow(() -> new NotFoundException("Usuario no encontrado."));
-    }
-
     /**
      * Elimina el usuario autenticado del sistema, si y solo si no tiene saldo
      * disponible en su cuenta.

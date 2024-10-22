@@ -1,11 +1,17 @@
+
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ */
 package ss1.api.models;
 
-import javax.persistence.Entity;
 import javax.persistence.OneToOne;
+import javax.persistence.Entity;
 import javax.persistence.Table;
 import org.hibernate.annotations.DynamicUpdate;
 
 /**
+ *
  * La clase Saldo es una entidad JPA que representa la tabla "saldo" en la base
  * de datos. Cada instancia de Saldo tiene un saldo disponible y está asociada a
  * un único usuario en una relación uno a uno.
@@ -14,7 +20,8 @@ import org.hibernate.annotations.DynamicUpdate;
  * Hibernate solo incluyan las columnas que han sido modificadas, optimizando el
  * rendimiento.
  *
- * @author luid
+ *
+ * @author Luis Monterroso
  */
 @Entity
 @Table(name = "saldo")
@@ -93,5 +100,4 @@ public class Saldo extends Auditor {
     public void setSaldoDisponible(Double saldoDisponible) {
         this.saldoDisponible = saldoDisponible;
     }
-
 }

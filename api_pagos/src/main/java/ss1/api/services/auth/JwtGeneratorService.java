@@ -25,8 +25,8 @@ public class JwtGeneratorService {
 
     //4040notfoundSecretKey!@# en base 64
     private static final String JWT_SECRET_KEY = "llave_secreta";
-    //nueve horas de validez
-    private static long JWT_TOKEN_TIME_VALIDITY = 1000 * 60 * 60 * (long) 48;
+    // 30 días de validez (30 días * 24 horas * 60 minutos * 60 segundos * 1000 milisegundos)
+    private static long JWT_TOKEN_TIME_VALIDITY = 1000 * 60 * 60 * 24 * 30;
 
     public String extractUserName(String token) {
         return extractClaims(token, Claims::getSubject);
