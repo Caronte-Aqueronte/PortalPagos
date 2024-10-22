@@ -11,7 +11,7 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 /**
- * La clase MovilizacionFondos representa una operación en la que un usuario
+ * La clase Retiro representa una operación en la que un usuario
  * retira fondos de su cuenta en el portal de pagos hacia una cuenta bancaria o
  * tarjeta de crédito. Durante la movilización de fondos, se calcula una
  * comisión que se descuenta del monto retirado.
@@ -37,7 +37,7 @@ import javax.validation.constraints.Size;
  */
 @Entity
 @Table(name = "movilizacion_fondo")
-public class MovilizacionFondos extends Auditor {
+public class Retiro extends Auditor {
 
     // Validación para asegurar que el usuario no sea nulo
     @NotNull(message = "El usuario no puede ser nulo.")
@@ -77,7 +77,7 @@ public class MovilizacionFondos extends Auditor {
     private static final double PORCENTAJE_COMISION = 1.3 / 100;
 
     // Constructor vacío para JPA
-    public MovilizacionFondos() {
+    public Retiro() {
     }
 
     /**
@@ -90,7 +90,7 @@ public class MovilizacionFondos extends Auditor {
      * @param entidadFinanciera El nombre de la entidad financiera donde se
      * realizará la transferencia.
      */
-    public MovilizacionFondos(Usuario usuario, Double montoRetirado, String cuentaDestino, String entidadFinanciera) {
+    public Retiro(Usuario usuario, Double montoRetirado, String cuentaDestino, String entidadFinanciera) {
         this.usuario = usuario;
         this.montoRetirado = montoRetirado;
         this.cuentaDestino = cuentaDestino;

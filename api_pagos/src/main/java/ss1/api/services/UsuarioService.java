@@ -9,9 +9,7 @@ import javax.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import ss1.api.excepciones.BadRequestException;
@@ -190,14 +188,11 @@ public class UsuarioService extends ss1.api.services.Service {
      * autorización para realizar esta operación.
      */
     public String eliminarUsuario(Usuario usuarioEliminar) throws BadRequestException, ConflictException, NotFoundException, UnauthorizedException {
-        // Obtener la información del usuario autenticado desde el contexto de seguridad
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String emailUsuarioAutenticado = authentication.getName();
         // Obtener el usuario que se intenta eliminar
         Usuario usuario = this.getUsuarioById(usuarioEliminar);
         // Verificar que el usuario autenticado coincide con el usuario que se intenta eliminar
-        this.verificarUsuarioJwt(usuario, emailUsuarioAutenticado);
-        return this.eliminarUsuarioAbs(usuarioEliminar);
+        this.verificarUsuarioJwt(usuario);
+        return this.eliminarUsuarioAbstraccion(usuarioEliminar);
     }
 
     /**
@@ -241,11 +236,8 @@ public class UsuarioService extends ss1.api.services.Service {
     public Usuario getMiUsuario(Long id) throws BadRequestException, ConflictException, NotFoundException, UnauthorizedException {
         //traer el usuario por id
         Usuario usuario = this.getUsuarioById(new Usuario(id));
-        // Obtener la información del usuario autenticado desde el contexto de seguridad
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String emailUsuarioAutenticado = authentication.getName();
         // Verificar que el usuario autenticado coincide con el usuario que se intenta eliminar
-        this.verificarUsuarioJwt(usuario, emailUsuarioAutenticado);
+        this.verificarUsuarioJwt(usuario);
         return usuario;
     }
 
@@ -255,11 +247,8 @@ public class UsuarioService extends ss1.api.services.Service {
         this.validarModelo(usuarioEditar);
         //traer el usuario por id
         Usuario usuario = this.getUsuarioById(new Usuario(usuarioEditar.getId()));
-        // Obtener la información del usuario autenticado desde el contexto de seguridad
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String emailUsuarioAutenticado = authentication.getName();
         // Verificar que el usuario autenticado coincide con el usuario que se intenta eliminar
-        this.verificarUsuarioJwt(usuario, emailUsuarioAutenticado);
+        this.verificarUsuarioJwt(usuario);
         //si tiene permisos entonces comparamos si la password que ingreso el cliente es la misma que esta en la bd
         boolean compararPassword = this.encriptador.compararPassword(usuarioEditar.getOldPassword(), usuario.getPassword());
         if (!compararPassword) {
@@ -276,11 +265,8 @@ public class UsuarioService extends ss1.api.services.Service {
         this.validarModelo(usuarioEditar);
         //traer el usuario por id
         Usuario usuario = this.getUsuarioById(new Usuario(usuarioEditar.getId()));
-        // Obtener la información del usuario autenticado desde el contexto de seguridad
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String emailUsuarioAutenticado = authentication.getName();
         // Verificar que el usuario autenticado coincide con el usuario que se intenta eliminar
-        this.verificarUsuarioJwt(usuario, emailUsuarioAutenticado);
+        this.verificarUsuarioJwt(usuario);
         //si tiene permisos entonces debemos editar la informacion
 
         usuario.setNit(usuarioEditar.getNit());
@@ -290,7 +276,9 @@ public class UsuarioService extends ss1.api.services.Service {
         return this.usuarioRepository.save(usuario);
     }
 
-    private String eliminarUsuarioAbs(Usuario usuarioEliminar) throws BadRequestException, ConflictException, NotFoundException, UnauthorizedException {
+    private String eliminarUsuarioAbstraccion(Usuario usuarioEliminar)
+            throws BadRequestException, ConflictException, NotFoundException, UnauthorizedException {
+
         //traer el usuario por id
         Usuario usuario = this.getUsuarioById(usuarioEliminar);
 
@@ -303,5 +291,36 @@ public class UsuarioService extends ss1.api.services.Service {
         usuario.setDeletedAt(LocalDateTime.now());
         usuarioRepository.save(usuario);
         return "Usuario eliminado con exito.";
+    }
+
+    /**
+     * Obtiene un objeto {@link Usuario} basado en el correo electrónico
+     * extraído del token JWT.
+     *
+     * @return El usuario asociado con el correo electrónico extraído del JWT.
+     * @throws NotFoundException Si ocurre un error al obtener el correo
+     * electrónico del JWT o si el usuario no es encontrado.
+     */
+    public Usuario getUsuarioUseJwt() throws NotFoundException {
+        String gmailUsuarioPorJwt = this.getEmaiJwt();
+        return this.getByEmail(gmailUsuarioPorJwt);
+    }
+
+    /**
+     * obtiene un usuario a partir de un correo electronico
+     *
+     * @param email
+     * @return
+     */
+    public Usuario getByEmail(String email)
+            throws BadRequestException, NotFoundException {
+        Usuario usuario = usuarioRepository.findOneByEmail(email)
+                .orElseThrow(() -> new NotFoundException("Email no encontrado."));
+        this.isDeleted(usuario);
+        return usuario;
+    }
+
+    public UsuarioRepository getUsuarioRepository() {
+        return usuarioRepository;
     }
 }

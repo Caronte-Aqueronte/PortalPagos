@@ -64,6 +64,9 @@ public class Saldo extends Auditor {
         this.saldoDisponible = saldoDisponible;
     }
 
+    public Saldo() {
+    }
+
     // Métodos Getters y Setters
     /**
      * Obtiene el usuario asociado a este saldo.

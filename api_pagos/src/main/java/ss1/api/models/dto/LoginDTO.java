@@ -22,7 +22,6 @@ import ss1.api.models.Usuario;
  *
  * @author luid
  */
-@Component
 public class LoginDTO {
 
     // Objeto Usuario que contiene los detalles del usuario autenticado

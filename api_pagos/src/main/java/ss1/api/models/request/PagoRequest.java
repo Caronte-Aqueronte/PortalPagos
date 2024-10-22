@@ -25,12 +25,17 @@ public class PagoRequest {
     @Length(max = 254, message = "El correo del receptor debe tener entre 1 y 254 caracteres.")
     private String correoReceptor;
 
+    @NotNull(message = "El concepto no puede ser nulo.")
+    @NotBlank(message = "El concepto no puede estar vacío.")
+    @Length(max = 300, message = "El concepto debe tener entre 1 y 300 caracteres.")
+    private String concepto;
+
     // Getters y setters
-    public double getCantidad() {
+    public Double getCantidad() {
         return cantidad;
     }
 
-    public void setCantidad(double cantidad) {
+    public void setCantidad(Double cantidad) {
         this.cantidad = cantidad;
     }
 
@@ -40,6 +45,14 @@ public class PagoRequest {
 
     public void setCorreoReceptor(String correoReceptor) {
         this.correoReceptor = correoReceptor;
+    }
+
+    public String getConcepto() {
+        return concepto;
+    }
+
+    public void setConcepto(String concepto) {
+        this.concepto = concepto;
     }
 
 }

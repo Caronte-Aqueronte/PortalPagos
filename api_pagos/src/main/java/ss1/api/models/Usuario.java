@@ -105,17 +105,29 @@ public class Usuario extends Auditor {
      */
     @OneToOne(cascade = CascadeType.ALL) // Cascada ALL para que al guardar el Usuario también se guarde el Perfil.
     @JoinColumn(name = "saldo")
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    @Schema(hidden = true)
     private Saldo saldo;
 
     /**
-     * Los movimientos asociados al usuario. La relación es uno a muchos, donde
-     * un usuario puede tener varios movimientos.
+     * Transacciones donde el usuario es el emisor. Un usuario puede ser el
+     * emisor de múltiples transacciones. La relación es uno a muchos, con la
+     * clave foránea "emisor_id" en la entidad Transaccion.
      */
-    @OneToMany(mappedBy = "usuario", orphanRemoval = true)
-    @Cascade(org.hibernate.annotations.CascadeType.ALL)
+    @OneToMany(mappedBy = "emisor", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @Schema(hidden = true)
-    private List<Movimiento> movimientos;
+    private List<Transaccion> transaccionesEmitidas;
+
+    /**
+     * Transacciones donde el usuario es el receptor. Un usuario puede ser el
+     * receptor de múltiples transacciones. La relación es uno a muchos, con la
+     * clave foránea "receptor_id" en la entidad Transaccion.
+     */
+    @OneToMany(mappedBy = "receptor", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    @Schema(hidden = true)
+    private List<Transaccion> transaccionesRecibidas;
 
     /**
      * Los movimientos asociados al usuario. La relación es uno a muchos, donde
@@ -125,7 +137,7 @@ public class Usuario extends Auditor {
     @Cascade(org.hibernate.annotations.CascadeType.ALL)
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @Schema(hidden = true)
-    private List<MovilizacionFondos> retirosEfectivo;
+    private List<Retiro> retirosEfectivo;
 
     /**
      * Las transacciones fallidas asociadas al usuario. La relación es uno a
@@ -286,30 +298,10 @@ public class Usuario extends Auditor {
     /**
      * Establece el saldo asociado al usuario.
      *
-     * @param rol el rol a establecer
+     * @param saldo el saldo a establecer
      */
     public void setSaldo(Saldo saldo) {
         this.saldo = saldo;
-    }
-
-    /**
-     * Obtiene la lista de movimientos asociados a la cuenta del usuario.
-     *
-     * @return Una lista de objetos de tipo Movimiento que representan los
-     * ingresos y egresos realizados en la cuenta del usuario.
-     */
-    public List<Movimiento> getMovimientos() {
-        return movimientos;
-    }
-
-    /**
-     * Establece la lista de movimientos asociados a la cuenta del usuario.
-     *
-     * @param movimientos Una lista de objetos de tipo Movimiento que representa
-     * los ingresos y egresos realizados en la cuenta.
-     */
-    public void setMovimientos(List<Movimiento> movimientos) {
-        this.movimientos = movimientos;
     }
 
     /**
@@ -320,7 +312,7 @@ public class Usuario extends Auditor {
      * @return Una lista de objetos de tipo MovilizacionFondos que representan
      * los retiros de efectivo realizados.
      */
-    public List<MovilizacionFondos> getRetirosEfectivo() {
+    public List<Retiro> getRetirosEfectivo() {
         return retirosEfectivo;
     }
 
@@ -332,7 +324,7 @@ public class Usuario extends Auditor {
      * @param retirosEfectivo Una lista de objetos de tipo MovilizacionFondos
      * que representa los retiros de efectivo realizados por el usuario.
      */
-    public void setRetirosEfectivo(List<MovilizacionFondos> retirosEfectivo) {
+    public void setRetirosEfectivo(List<Retiro> retirosEfectivo) {
         this.retirosEfectivo = retirosEfectivo;
     }
 
@@ -342,6 +334,22 @@ public class Usuario extends Auditor {
 
     public void setTransaccionesFallidas(List<TransaccionFallida> transaccionesFallidas) {
         this.transaccionesFallidas = transaccionesFallidas;
+    }
+
+    public List<Transaccion> getTransaccionesEmitidas() {
+        return transaccionesEmitidas;
+    }
+
+    public void setTransaccionesEmitidas(List<Transaccion> transaccionesEmitidas) {
+        this.transaccionesEmitidas = transaccionesEmitidas;
+    }
+
+    public List<Transaccion> getTransaccionesRecibidas() {
+        return transaccionesRecibidas;
+    }
+
+    public void setTransaccionesRecibidas(List<Transaccion> transaccionesRecibidas) {
+        this.transaccionesRecibidas = transaccionesRecibidas;
     }
 
 }
