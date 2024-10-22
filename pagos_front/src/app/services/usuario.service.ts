@@ -4,14 +4,12 @@ import { Observable } from 'rxjs';
 import { environment } from '../enviorment';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class UsuarioService {
-
-
   private baseUrl = environment.apiUrl + '/usuario/'; // URL base de la API
   private apiPublic = environment.apiUrl + '/usuario/public'; // URL base de la API
-  private apiPrivate = environment.apiUrl + '/usuario/private'; // URL base de la API
+  private apiProtected = environment.apiUrl + '/usuario/protected'; // URL base de la API
 
   constructor(private http: HttpClient) {}
 
@@ -20,5 +18,23 @@ export class UsuarioService {
     const url = `${this.apiPublic}/login`; // Agrega el endpoint específico
     const body = { email, password };
     return this.http.post(url, body);
+  }
+
+  // Método para editarPerfil
+  editarPerfil(body: any): Observable<any> {
+    const url = `${this.apiProtected}/editarPerfil`; // Agrega el endpoint específico
+    return this.http.patch(url, body);
+  }
+
+  // Método para obtener la información del usuario por su ID
+  getMiUsuario(id: number): Observable<any> {
+    const url = `${this.apiProtected}/getMiUsuario/${id}`; // URL con el ID del usuario
+    return this.http.get(url); // Realiza la solicitud GET
+  }
+
+  // Método para obtener la información del usuario por su ID
+  cambiarPassword(body: any): Observable<any> {
+    const url = `${this.apiProtected}/editarPassword`; // Agrega el endpoint específico
+    return this.http.patch(url, body);
   }
 }

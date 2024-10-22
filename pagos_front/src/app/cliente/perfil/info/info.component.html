@@ -1,0 +1,117 @@
+<div class="max-w-4xl mx-auto space-y-10">
+    <!-- Tarjeta de Información de Perfil -->
+    <div class="p-4 md:p-6 bg-white shadow-lg rounded-lg">
+        <!-- Sección del título y la imagen del perfil -->
+        <div class="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-6 mb-6">
+            <fa-icon [icon]="['fas', 'user-circle']" class="h-20 w-20 md:h-24 md:w-24 text-gray-500"></fa-icon>
+            <h2 class="text-xl md:text-2xl font-bold text-gray-800 text-center md:text-left">Información de Perfil</h2>
+        </div>
+
+        <!-- Formulario para la información del perfil -->
+        <form [formGroup]="profileForm" (ngSubmit)="editar()">
+            <div class="grid grid-cols-1 gap-y-6 gap-x-6 lg:grid-cols-2">
+                <!-- Nombres -->
+                <div>
+                    <label for="nombres" class="block text-sm font-medium text-gray-700">Nombres</label>
+                    <input id="nombres" formControlName="nombres" type="text"
+                        class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
+                    <div *ngIf="profileForm.get('nombres')?.invalid && profileForm.get('nombres')?.touched"
+                        class="text-red-600 text-sm">
+                        Los nombres son obligatorios.
+                    </div>
+                </div>
+
+                <!-- Apellidos -->
+                <div>
+                    <label for="apellidos" class="block text-sm font-medium text-gray-700">Apellidos</label>
+                    <input id="apellidos" formControlName="apellidos" type="text"
+                        class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
+                    <div *ngIf="profileForm.get('apellidos')?.invalid && profileForm.get('apellidos')?.touched"
+                        class="text-red-600 text-sm">
+                        Los apellidos son obligatorios.
+                    </div>
+                </div>
+
+                <!-- NIT -->
+                <div>
+                    <label for="nit" class="block text-sm font-medium text-gray-700">NIT</label>
+                    <input id="nit" formControlName="nit" type="text"
+                        class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
+                    <div *ngIf="profileForm.get('nit')?.invalid && profileForm.get('nit')?.touched"
+                        class="text-red-600 text-sm">
+                        El NIT debe tener entre 6 y 12 caracteres.
+                    </div>
+                </div>
+
+                <!-- Email (solo lectura) -->
+                <div>
+                    <label for="email" class="block text-sm font-medium text-gray-700">Correo Electrónico</label>
+                    <input id="email" formControlName="email" type="email"
+                        class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                        readonly />
+                </div>
+            </div>
+
+            <!-- Botón de guardar -->
+            <div class="flex justify-end mt-6">
+                <button type="submit"
+                    class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                    [disabled]="profileForm.invalid">
+                    Guardar cambios
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Tarjeta de Cambio de Contraseña -->
+    <div class="p-4 md:p-6 bg-white shadow-lg rounded-lg">
+        <!-- Sección del título y la imagen del perfil -->
+        <div class="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-6 mb-6">
+            <fa-icon [icon]="['fas', 'lock']" class="h-20 w-20 md:h-24 md:w-24 text-gray-500"></fa-icon>
+            <h2 class="text-xl md:text-2xl font-bold text-gray-800 mb-6">Cambiar Contraseña</h2>
+        </div>
+
+
+        <!-- Formulario para cambiar la contraseña -->
+        <form [formGroup]="passwordForm" (ngSubmit)="cambiarPassword()">
+            <div class="grid grid-cols-1 gap-y-6 gap-x-6 lg:grid-cols-2">
+                <!-- Contraseña actual -->
+                <div>
+                    <label for="oldPassword" class="block text-sm font-medium text-gray-700">Contraseña actual</label>
+                    <input id="oldPassword" formControlName="oldPassword" type="password"
+                        class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
+                    <div *ngIf="passwordForm.get('oldPassword')?.invalid && passwordForm.get('oldPassword')?.touched"
+                        class="text-red-600 text-sm">
+                        La contraseña actual es obligatoria.
+                    </div>
+                </div>
+
+                <!-- Nueva contraseña -->
+                <div>
+                    <label for="newPassword" class="block text-sm font-medium text-gray-700">Nueva contraseña</label>
+                    <input id="newPassword" formControlName="newPassword" type="password"
+                        class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
+                    <div *ngIf="passwordForm.get('newPassword')?.invalid && passwordForm.get('newPassword')?.touched"
+                        class="text-red-600 text-sm">
+                        La nueva contraseña debe tener al menos 6 caracteres.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Botón de cambiar contraseña -->
+            <div class="flex justify-end mt-6">
+                <button type="submit"
+                    class="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                    [disabled]="passwordForm.invalid">
+                    Cambiar Contraseña
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Componente de alerta de error -->
+    <app-error-alert [message]="errorMessage" (close)="closeErrorAlert()"></app-error-alert>
+
+    <!-- Componente de alerta de éxito -->
+    <app-success-alert [message]="successMessage" (close)="closeSuccessAlert()"></app-success-alert>
+</div>

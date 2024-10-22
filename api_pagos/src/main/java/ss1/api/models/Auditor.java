@@ -50,19 +50,22 @@ public class Auditor {
     @Schema(hidden = true)
     private LocalDateTime deletedAt;
 
-    public Auditor(Long id, LocalDateTime createdAt, LocalDateTime updatedAt, LocalDateTime desactivatedAt) {
-        this.id = id;
-        this.createdAt = createdAt;
-        this.updatedAt = updatedAt;
-        this.desactivatedAt = desactivatedAt;
-    }
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    @Schema(hidden = true)
+    private Boolean deleted;
 
-    public Auditor(Long id, LocalDateTime createdAt, LocalDateTime updatedAt, LocalDateTime desactivatedAt, LocalDateTime deletedAt) {
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    @Schema(hidden = true)
+    private Boolean desactivated;
+
+    public Auditor(Long id, LocalDateTime createdAt, LocalDateTime updatedAt, LocalDateTime desactivatedAt, LocalDateTime deletedAt, Boolean deleted, Boolean desactivated) {
         this.id = id;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
         this.desactivatedAt = desactivatedAt;
         this.deletedAt = deletedAt;
+        this.deleted = deleted;
+        this.desactivated = desactivated;
     }
 
     public Auditor(Long id) {
@@ -111,4 +114,21 @@ public class Auditor {
     public void setDeletedAt(LocalDateTime deletedAt) {
         this.deletedAt = deletedAt;
     }
+
+    public Boolean getDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(Boolean deleted) {
+        this.deleted = deleted;
+    }
+
+    public Boolean getDesactivated() {
+        return desactivated;
+    }
+
+    public void setDesactivated(Boolean desactivated) {
+        this.desactivated = desactivated;
+    }
+
 }

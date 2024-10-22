@@ -5,14 +5,20 @@
 package ss1.api.models;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
+import java.util.List;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.DynamicUpdate;
 
 /**
@@ -93,6 +99,57 @@ public class Usuario extends Auditor {
     private Rol rol;
 
     /**
+     * El saldo asociado al usuario. La relación es uno a uno, donde un usuario
+     * puede tener solo un saldo. El campo {@code saldo} se almacena usando la
+     * columna "saldo" en la tabla.
+     */
+    @OneToOne(cascade = CascadeType.ALL) // Cascada ALL para que al guardar el Usuario también se guarde el Perfil.
+    @JoinColumn(name = "saldo")
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    @Schema(hidden = true)
+    private Saldo saldo;
+
+    /**
+     * Transacciones donde el usuario es el emisor. Un usuario puede ser el
+     * emisor de múltiples transacciones. La relación es uno a muchos, con la
+     * clave foránea "emisor_id" en la entidad Transaccion.
+     */
+    @OneToMany(mappedBy = "emisor", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    @Schema(hidden = true)
+    private List<Transaccion> transaccionesEmitidas;
+
+    /**
+     * Transacciones donde el usuario es el receptor. Un usuario puede ser el
+     * receptor de múltiples transacciones. La relación es uno a muchos, con la
+     * clave foránea "receptor_id" en la entidad Transaccion.
+     */
+    @OneToMany(mappedBy = "receptor", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    @Schema(hidden = true)
+    private List<Transaccion> transaccionesRecibidas;
+
+    /**
+     * Los movimientos asociados al usuario. La relación es uno a muchos, donde
+     * un usuario puede tener varios movimientos.
+     */
+    @OneToMany(mappedBy = "usuario", orphanRemoval = true)
+    @Cascade(org.hibernate.annotations.CascadeType.ALL)
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    @Schema(hidden = true)
+    private List<Retiro> retirosEfectivo;
+
+    /**
+     * Las transacciones fallidas asociadas al usuario. La relación es uno a
+     * muchos, donde un usuario puede tener varios fallos.
+     */
+    @OneToMany(mappedBy = "usuario", orphanRemoval = true)
+    @Cascade(org.hibernate.annotations.CascadeType.ALL)
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    @Schema(hidden = true)
+    private List<TransaccionFallida> transaccionesFallidas;
+
+    /**
      * Constructor para inicializar un objeto Usuario con todos los atributos.
      *
      * @param nit el NIT del usuario
@@ -109,6 +166,10 @@ public class Usuario extends Auditor {
         this.apellidos = apellidos;
         this.password = password;
         this.rol = rol;
+    }
+
+    public Usuario(Long id) {
+        super(id);
     }
 
     /**
@@ -224,4 +285,71 @@ public class Usuario extends Auditor {
     public void setRol(Rol rol) {
         this.rol = rol;
     }
+
+    /**
+     * Obtiene el saldo asociado al usuario.
+     *
+     * @return el saldo del usuario
+     */
+    public Saldo getSaldo() {
+        return saldo;
+    }
+
+    /**
+     * Establece el saldo asociado al usuario.
+     *
+     * @param saldo el saldo a establecer
+     */
+    public void setSaldo(Saldo saldo) {
+        this.saldo = saldo;
+    }
+
+    /**
+     * Obtiene la lista de retiros de efectivo (movilizaciones de fondos)
+     * realizados por el usuario desde la cuenta del portal de pagos hacia una
+     * cuenta bancaria o tarjeta de crédito.
+     *
+     * @return Una lista de objetos de tipo MovilizacionFondos que representan
+     * los retiros de efectivo realizados.
+     */
+    public List<Retiro> getRetirosEfectivo() {
+        return retirosEfectivo;
+    }
+
+    /**
+     * Establece la lista de retiros de efectivo (movilizaciones de fondos)
+     * realizados por el usuario desde la cuenta del portal de pagos hacia una
+     * cuenta bancaria o tarjeta de crédito.
+     *
+     * @param retirosEfectivo Una lista de objetos de tipo MovilizacionFondos
+     * que representa los retiros de efectivo realizados por el usuario.
+     */
+    public void setRetirosEfectivo(List<Retiro> retirosEfectivo) {
+        this.retirosEfectivo = retirosEfectivo;
+    }
+
+    public List<TransaccionFallida> getTransaccionesFallidas() {
+        return transaccionesFallidas;
+    }
+
+    public void setTransaccionesFallidas(List<TransaccionFallida> transaccionesFallidas) {
+        this.transaccionesFallidas = transaccionesFallidas;
+    }
+
+    public List<Transaccion> getTransaccionesEmitidas() {
+        return transaccionesEmitidas;
+    }
+
+    public void setTransaccionesEmitidas(List<Transaccion> transaccionesEmitidas) {
+        this.transaccionesEmitidas = transaccionesEmitidas;
+    }
+
+    public List<Transaccion> getTransaccionesRecibidas() {
+        return transaccionesRecibidas;
+    }
+
+    public void setTransaccionesRecibidas(List<Transaccion> transaccionesRecibidas) {
+        this.transaccionesRecibidas = transaccionesRecibidas;
+    }
+
 }

@@ -1,0 +1,132 @@
+<div class="min-h-screen flex flex-col lg:flex-row gap-4 p-6 relative">
+    <!-- Botón de realizar transferencia (parte superior derecha) -->
+    <button (click)="openTransferPopup()"
+        class="absolute top-4 right-6 bg-green-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-green-600 focus:outline-none">
+        <fa-icon [icon]="['fas', 'exchange-alt']" class="mr-2"></fa-icon>
+        Realizar Transferencia
+    </button>
+
+    <!-- Información general de la cuenta (lado izquierdo) -->
+    <div class="w-full lg:w-1/3 bg-white shadow-lg rounded-lg p-6">
+        <div class="flex items-center space-x-4 mb-4">
+            <!-- Icono de cuenta -->
+            <fa-icon [icon]="['fas', 'user-circle']" class="h-12 w-12 text-gray-600"></fa-icon>
+            <h2 class="text-xl font-bold text-gray-700">Mi cuenta</h2>
+        </div>
+
+        <!-- Saldo disponible -->
+        <div class="mb-6">
+            <p class="text-lg text-gray-500">Saldo disponible:</p>
+            <p class="text-3xl font-semibold text-gray-800">Q1,200.00</p>
+        </div>
+
+        <!-- Botón para retirar dinero -->
+        <button
+            class="w-full bg-indigo-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-indigo-700 focus:outline-none">
+            <fa-icon [icon]="['fas', 'money-bill']" class="mr-2"></fa-icon>
+            Retirar dinero
+        </button>
+    </div>
+
+    <!-- Transacciones recientes (lado derecho) -->
+    <div class="w-full lg:w-2/3 bg-white shadow-lg rounded-lg p-6">
+        <h2 class="text-xl font-bold text-gray-700 mb-4">Transacciones recientes</h2>
+
+        <ul class="space-y-4">
+            <!-- Transacción 1 -->
+            <li class="flex justify-between items-center bg-gray-100 p-4 rounded-lg">
+                <div class="flex items-center space-x-4">
+                    <fa-icon [icon]="['fas', 'exchange-alt']" class="h-6 w-6 text-gray-500"></fa-icon>
+                    <div>
+                        <p class="text-sm font-semibold text-gray-700">Pago recibido</p>
+                        <p class="text-xs text-gray-500">01/10/2024</p>
+                    </div>
+                </div>
+                <p class="text-lg font-semibold text-green-600">+ $500.00</p>
+            </li>
+
+            <!-- Transacción 2 -->
+            <li class="flex justify-between items-center bg-gray-100 p-4 rounded-lg">
+                <div class="flex items-center space-x-4">
+                    <fa-icon [icon]="['fas', 'exchange-alt']" class="h-6 w-6 text-gray-500"></fa-icon>
+                    <div>
+                        <p class="text-sm font-semibold text-gray-700">Compra realizada</p>
+                        <p class="text-xs text-gray-500">29/09/2024</p>
+                    </div>
+                </div>
+                <p class="text-lg font-semibold text-red-600">- $200.00</p>
+            </li>
+
+        </ul>
+    </div>
+    <!-- Popup de transferencia -->
+    <div class="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center z-50"
+        *ngIf="showTransferPopup">
+        <div class="bg-white p-6 rounded-lg shadow-lg max-w-md w-full relative">
+            <!-- Botón de cerrar -->
+            <button class="absolute top-2 right-2 text-gray-500 hover:text-gray-700" (click)="closeTransferPopup()">
+                <fa-icon [icon]="['fas', 'times']" class="h-6 w-6"></fa-icon>
+            </button>
+
+            <!-- Icono de transferencia -->
+            <div class="flex justify-center mb-4">
+                <fa-icon [icon]="['fas', 'money-bill-wave']" class="h-12 w-12 text-green-500"></fa-icon>
+            </div>
+
+            <!-- Formulario de transferencia -->
+            <h2 class="text-xl font-bold text-gray-800 mb-4 text-center">Realizar Transferencia</h2>
+            <form [formGroup]="transferForm" (ngSubmit)="submitTransfer()">
+                <!-- Email de destino -->
+                <div class="mb-4">
+                    <label for="correoReceptor" class="block text-sm font-medium text-gray-700">Email de destino</label>
+                    <input id="correoReceptor" formControlName="correoReceptor" type="email"
+                        class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
+                    <div *ngIf="transferForm.get('correoReceptor')?.invalid && transferForm.get('correoReceptor')?.touched"
+                        class="text-red-600 text-sm">
+                        Debes ingresar un email válido.
+                    </div>
+                </div>
+
+                <!-- cantidad -->
+                <div class="mb-4">
+                    <label for="cantidad" class="block text-sm font-medium text-gray-700">Cantidad a transferir</label>
+                    <input id="cantidad" formControlName="cantidad" type="number"
+                        class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
+                    <div *ngIf="transferForm.get('cantidad')?.invalid && transferForm.get('cantidad')?.touched"
+                        class="text-red-600 text-sm">
+                        La cantidad debe ser mayor a 0.
+                    </div>
+                </div>
+
+                <!-- Concepto -->
+                <div class="mb-4">
+                    <label for="concepto" class="block text-sm font-medium text-gray-700">Concepto</label>
+                    <input id="concepto" formControlName="concepto" type="text"
+                        class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
+                    <div *ngIf="transferForm.get('concepto')?.invalid && transferForm.get('concepto')?.touched"
+                        class="text-red-600 text-sm">
+                        El concepto es obligatorio y debe tener menos de 300 caracteres.
+                    </div>
+                </div>
+
+                <!-- Botón de transferir -->
+                <div class="flex justify-end">
+                    <button type="submit"
+                        class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                        [disabled]="transferForm.invalid">
+                        <fa-icon [icon]="['fas', 'paper-plane']" class="mr-2"></fa-icon>
+                        Transferir
+                    </button>
+                </div>
+            </form>
+        </div>
+
+
+    </div>
+
+    <!-- Componente de alerta de error -->
+    <app-error-alert [message]="errorMessage" (close)="closeErrorAlert()"></app-error-alert>
+
+    <!-- Componente de alerta de éxito -->
+    <app-success-alert [message]="successMessage" (close)="closeSuccessAlert()"></app-success-alert>
+</div>

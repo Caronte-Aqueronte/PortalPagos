@@ -12,12 +12,18 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ss1.api.models.Usuario;
 import ss1.api.models.dto.LoginDTO;
+import ss1.api.models.request.EditarPasswordRequest;
+import ss1.api.models.request.EditarPerfilRequest;
 import ss1.api.models.request.LoginRequest;
 import ss1.api.services.UsuarioService;
 
@@ -69,6 +75,68 @@ public class UsuarioController {
         LoginDTO nuevoUsuario = usuarioService.crearUsuario(usuario);
         // Si todo está correcto, devolver la respuesta 201 Created con el usuario creado
         return ResponseEntity.status(HttpStatus.CREATED).body(nuevoUsuario);
+    }
+
+    @Operation(summary = "Elimina un usuario en el sistema, si y solo si no tiene fondos en la cuenta.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Usuario eliminado exitosamente",
+                content = @Content(mediaType = "application/json", schema = @Schema(implementation = String.class))),
+        @ApiResponse(responseCode = "400", description = "Solicitud incorrecta, validación fallida", content = @Content),
+        @ApiResponse(responseCode = "409", description = "Conflicto, el usuario tiene saldo en su cuenta y no puede ser eliminado",
+                content = @Content(mediaType = "application/json", schema = @Schema(implementation = String.class))),
+        @ApiResponse(responseCode = "401", description = "Inautorizado, el usuario no tiene los permisos suficientes",
+                content = @Content(mediaType = "application/json", schema = @Schema(implementation = String.class))),
+        @ApiResponse(responseCode = "500", description = "Error interno del servidor", content = @Content)
+    })
+    @DeleteMapping("/protected/eliminarUsuario")
+    public ResponseEntity<?> eliminarUsuario(@RequestBody Usuario usuario) {
+        // Llamar al servicio para crear el usuario
+        String nuevoUsuario = usuarioService.eliminarUsuario(usuario);
+        // Si todo está correcto, devolver la respuesta 201 Created con el usuario creado
+        return ResponseEntity.status(HttpStatus.OK).body(nuevoUsuario);
+    }
+
+    @Operation(summary = "Obtener usuario por ID",
+            description = "Obtiene la información del usuario basado en el ID proporcionado, el usuario debe estar autenticado.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Usuario encontrado", content = {
+            @Content(mediaType = "application/json", schema = @Schema(implementation = Usuario.class))}),
+        @ApiResponse(responseCode = "500", description = "Error interno del servidor")
+    })
+    @GetMapping("/protected/getMiUsuario/{id}")
+    public ResponseEntity<?> getMiUsuario(@PathVariable Long id) {
+        Usuario data = usuarioService.getMiUsuario(id);
+        return ResponseEntity.status(HttpStatus.OK).body(data);
+    }
+
+    @Operation(summary = "Edita la informacion del perfil del cliente.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Usuario editado exitosamente",
+                content = @Content(mediaType = "application/json", schema = @Schema(implementation = String.class))),
+        @ApiResponse(responseCode = "400", description = "Solicitud incorrecta, validación fallida", content = @Content),
+        @ApiResponse(responseCode = "401", description = "Inautorizado, el usuario no tiene los permisos suficientes",
+                content = @Content(mediaType = "application/json", schema = @Schema(implementation = String.class))),
+        @ApiResponse(responseCode = "500", description = "Error interno del servidor", content = @Content)
+    })
+    @PatchMapping("/protected/editarPerfil")
+    public ResponseEntity<?> editarPerfil(@RequestBody EditarPerfilRequest id) {
+        Usuario data = usuarioService.editarPerfil(id);
+        return ResponseEntity.status(HttpStatus.OK).body(data);
+    }
+
+    @Operation(summary = "Edita la password si y solo si la passoword anterior esta bien.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Usuario editado exitosamente",
+                content = @Content(mediaType = "application/json", schema = @Schema(implementation = String.class))),
+        @ApiResponse(responseCode = "400", description = "Solicitud incorrecta, validación fallida", content = @Content),
+        @ApiResponse(responseCode = "401", description = "Inautorizado, el usuario no tiene los permisos suficientes",
+                content = @Content(mediaType = "application/json", schema = @Schema(implementation = String.class))),
+        @ApiResponse(responseCode = "500", description = "Error interno del servidor", content = @Content)
+    })
+    @PatchMapping("/protected/editarPassword")
+    public ResponseEntity<?> editarPassword(@RequestBody EditarPasswordRequest id) {
+        Usuario data = usuarioService.editarPassword(id);
+        return ResponseEntity.status(HttpStatus.OK).body(data);
     }
 
 }
