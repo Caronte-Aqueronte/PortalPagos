@@ -4,19 +4,24 @@
  */
 package ss1.api.models.request;
 
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
-import org.springframework.stereotype.Component;
+import org.hibernate.validator.constraints.Length;
 
 /**
  *
  * @author luid
  */
-@Component
 public class LoginRequest {
 
-    @NotNull(message = "El email no puede ser nulo.")
+    @NotNull(message = "El correo no puede ser nulo.")
+    @NotBlank(message = "El correo no puede estar vacío.")
+    @Email(message = "El correo debe ser un correo electrónico válido.")
+    @Length(max = 254, message = "El correo del receptor debe tener entre 1 y 254 caracteres.")
     private String email;
     @NotNull(message = "La password no puede ser nula.")
+    @Length(max = 254, message = "La password debe tener entre 1 y 254 caracteres.")
     private String password;
 
     public LoginRequest(String email, String password) {
