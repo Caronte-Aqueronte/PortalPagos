@@ -4,15 +4,24 @@
  */
 package ss1.api.services;
 
+import java.sql.Date;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 import javax.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.web.client.RestTemplate;
 import ss1.api.excepciones.ConflictException;
 import ss1.api.excepciones.NotFoundException;
+import ss1.api.excepciones.UnauthorizedException;
 import ss1.api.models.Transaccion;
 import ss1.api.models.TransaccionFallida;
 import ss1.api.models.Usuario;
 import ss1.api.models.dto.TransaccionDTO;
+import ss1.api.models.request.PagoExternoRequest;
 import ss1.api.models.request.PagoRequest;
 import ss1.api.repositories.TransaccionRepository;
 import ss1.api.tools.ManejadorTiempo;
@@ -23,6 +32,11 @@ import ss1.api.tools.ManejadorTiempo;
  */
 @org.springframework.stereotype.Service
 public class TransaccionService extends Service {
+
+    @Value("${externo.servicio.urlTiendaA}")
+    private String urlTiendaA;
+    @Value("${externo.servicio.urlTiendaB}")
+    private String urlTiendaB;
 
     @Autowired
     private TransaccionRepository transaccionRepository;
@@ -49,16 +63,25 @@ public class TransaccionService extends Service {
      * conflicto en el proceso.
      */
     @Transactional(rollbackOn = Exception.class)
-    public TransaccionDTO procesarPago(PagoRequest pago) throws NotFoundException,
+    private Transaccion procesarPago(PagoRequest pago) throws NotFoundException,
             ConflictException {
+        validarModelo(pago);
         //debemos traer el usuario que desea realizar el pago
         Usuario emisor = usuarioService.getUsuarioUseJwt();
         //traer el usuario destinatario
         Usuario receptor = usuarioService.getByEmail(pago.getCorreoReceptor());
+
+        //verificar que el receptor no sea le mismo que el emisor
+        if (Objects.equals(emisor.getId(), receptor.getId())) {
+            throw new ConflictException("No puedes transferirte a ti mismo.");
+        }
+
         //verificamos que el usuario tenga salgo
         boolean usuarioTieneSaldo = saldoService.usuarioTieneSaldo(emisor);
+        boolean usuarioTieneSaldoSuficiente = saldoService.usuarioTieneSaldoSuficiente(receptor,
+                pago.getCantidad());
 
-        if (!usuarioTieneSaldo) {
+        if (!usuarioTieneSaldo || !usuarioTieneSaldoSuficiente) {
 
             TransaccionFallida transaccionFallida = new TransaccionFallida(
                     emisor,
@@ -86,9 +109,115 @@ public class TransaccionService extends Service {
                 emisor);
 
         //persistir la transaccion
-        Transaccion save = transaccionRepository.save(transaccion);
+        return transaccionRepository.save(transaccion);
+    }
+
+    @Transactional(rollbackOn = Exception.class)
+    public TransaccionDTO pagar(PagoRequest pago) throws NotFoundException,
+            ConflictException {
+        validarModelo(pago);
+        Transaccion guardarTransaccion = procesarPago(pago);
         //ahora debemos ver si el usuario autenticado tiene los fondos suficientes para hacer el debito
-        return constuirTransaccionDTO(transaccion);
+        return constuirTransaccionDTO(guardarTransaccion);
+    }
+
+    @Transactional(rollbackOn = Exception.class)
+    public byte[] pagarGetComprobante(PagoExternoRequest pago) throws NotFoundException,
+            ConflictException {
+        validarModelo(pago);
+        Transaccion guardarTransaccion = procesarPago(pago);
+
+        // Inicializar el RestTemplate para realizar la solicitud GET
+        RestTemplate restTemplate = new RestTemplate();
+        String url;
+
+        //mandar a traer la informacion de la tienda segun su identificadorF
+        switch (pago.getIdentificadorTienda()) {
+            case "a":
+                url = urlTiendaA;
+                break;
+            case "b":
+                url = urlTiendaB;
+            default:
+                throw new NotFoundException("Tienda no reconocida.");
+
+        }
+
+        //mandamos a traer la imagen de la tienda
+        return null;
+    }
+
+    /**
+     * Obtiene las últimas 20 transacciones de un usuario específico donde el
+     * usuario actúa como emisor o receptor. Este método primero verifica la
+     * identidad del usuario y luego recupera las transacciones más recientes,
+     * devolviéndolas como una lista de {@link TransaccionDTO}.
+     *
+     * @param idUsuario ID del usuario cuyas transacciones se desean consultar.
+     * @return Lista de objetos {@link TransaccionDTO} que representa las
+     * últimas 20 transacciones del usuario.
+     * @throws UnauthorizedException si el usuario no tiene autorización para
+     * realizar esta consulta.
+     * @throws NotFoundException si el usuario especificado no se encuentra en
+     * el sistema.
+     */
+    public List<TransaccionDTO> getMisUltimasTransacciones(Long idUsuario) throws UnauthorizedException,
+            NotFoundException {
+        //verificar la identidad del usuario
+        Usuario usuario = usuarioService.getUsuarioById(new Usuario(idUsuario));
+        this.verificarUsuarioJwt(usuario);
+        //mandar a traer el top 20 de transacciones del usuario
+        List<Transaccion> _20Transacciones
+                = transaccionRepository.findTop20ByUsuarioIdOrderByCreatedAtDesc(idUsuario);
+        return constuirTransaccionesDTOS(_20Transacciones);
+    }
+
+    public List<TransaccionDTO> getMisPagosEnDosFechas(Long idUsuario,
+            LocalDate fecha1, LocalDate fecha2) throws UnauthorizedException,
+            NotFoundException {
+        //verificar la identidad del usuario
+        Usuario usuario = usuarioService.getUsuarioById(new Usuario(idUsuario));
+        this.verificarUsuarioJwt(usuario);
+
+        Date fecha1Date = null;
+        Date fecha2Date = null;
+
+        if (fecha1 != null) {
+            fecha1Date = Date.valueOf(fecha1);
+        }
+
+        if (fecha2 != null) {
+            fecha2Date = Date.valueOf(fecha2);
+        }
+        //mandar a traer el top 20 de transacciones del usuario
+        List<Transaccion> transacciones
+                = transaccionRepository.findByUsuarioEmisorAndFechaBetween(idUsuario,
+                        fecha1Date, fecha2Date);
+        return constuirTransaccionesDTOS(transacciones);
+    }
+
+    public List<TransaccionDTO> getMisIngresosEnDosFechas(Long idUsuario,
+            LocalDate fecha1, LocalDate fecha2) throws UnauthorizedException,
+            NotFoundException {
+        //verificar la identidad del usuario
+        Usuario usuario = usuarioService.getUsuarioById(new Usuario(idUsuario));
+        this.verificarUsuarioJwt(usuario);
+
+        Date fecha1Date = null;
+        Date fecha2Date = null;
+
+        if (fecha1 != null) {
+            fecha1Date = Date.valueOf(fecha1);
+        }
+
+        if (fecha2 != null) {
+            fecha2Date = Date.valueOf(fecha2);
+        }
+        //mandar a traer el top 20 de transacciones del usuario
+        List<Transaccion> transacciones
+                = transaccionRepository.findByUsuarioReceptorAndFechaBetween(idUsuario,
+                        fecha1Date, fecha2Date);
+        return constuirTransaccionesDTOS(transacciones);
     }
 
     /**
@@ -103,12 +232,32 @@ public class TransaccionService extends Service {
     private TransaccionDTO constuirTransaccionDTO(Transaccion transaccion) {
         return new TransaccionDTO(
                 transaccion.getId(),
-                transaccion.getMonto(),
+                manejadorMoneda.cantidadAFormatoRegional(transaccion.getMonto()),
                 transaccion.getConcepto(),
                 transaccion.getEmisor().getEmail(),
                 transaccion.getReceptor().getEmail(),
-                this.manejadorTiempo.localDateANombreDia(
+                this.manejadorTiempo.parsearFechaYHoraAFormatoRegional(
                         transaccion.getCreatedAt().toLocalDate())
         );
+    }
+
+    /**
+     * Convierte una lista de entidades de tipo {@link Transaccion} a una lista
+     * de objetos de tipo {@link TransaccionDTO}. Este método utiliza el método
+     * auxiliar {@code constuirTransaccionDTO} para construir cada
+     * {@link TransaccionDTO}.
+     *
+     * @param transacciones Lista de objetos {@link Transaccion} que se desea
+     * convertir a DTOs.
+     * @return Lista de objetos {@link TransaccionDTO} correspondiente a las
+     * transacciones proporcionadas.
+     */
+    private List<TransaccionDTO> constuirTransaccionesDTOS(List<Transaccion> transacciones) {
+        ArrayList<TransaccionDTO> transaccionesDTOS = new ArrayList<>();
+        //por cada transaccion en la lista crear un DTO
+        for (Transaccion item : transacciones) {
+            transaccionesDTOS.add(constuirTransaccionDTO(item));
+        }
+        return transaccionesDTOS;
     }
 }

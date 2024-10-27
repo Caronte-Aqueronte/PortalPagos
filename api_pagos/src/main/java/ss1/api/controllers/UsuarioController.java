@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ss1.api.models.Usuario;
+import ss1.api.models.dto.ExistEmailDTO;
 import ss1.api.models.dto.LoginDTO;
 import ss1.api.models.request.EditarPasswordRequest;
 import ss1.api.models.request.EditarPerfilRequest;
@@ -139,4 +140,26 @@ public class UsuarioController {
         return ResponseEntity.status(HttpStatus.OK).body(data);
     }
 
+    /**
+     * Endpoint público para verificar si un email ya existe en el sistema.
+     *
+     * @param email Dirección de correo electrónico que se desea verificar.
+     * @return ResponseEntity con un objeto {@link ExistEmailDTO} que indica si
+     * el email tiene cuenta asociada.
+     */
+    @Operation(summary = "Verificar si un email ya existe en el sistema",
+            description = "Devuelve un objeto que indica si el email proporcionado ya está registrado.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Email verificado correctamente",
+                content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExistEmailDTO.class))),
+        @ApiResponse(responseCode = "400", description = "Solicitud incorrecta - El email no puede ser nulo",
+                content = @Content(mediaType = "application/json", schema = @Schema(implementation = String.class))),
+        @ApiResponse(responseCode = "500", description = "Error inesperado",
+                content = @Content(mediaType = "application/json", schema = @Schema(implementation = String.class)))
+    })
+    @GetMapping("/public/existeEmail/{email}")
+    public ResponseEntity<?> getMiUsuario(@PathVariable String email) {
+        ExistEmailDTO data = usuarioService.existeEmail(email);
+        return ResponseEntity.status(HttpStatus.OK).body(data);
+    }
 }

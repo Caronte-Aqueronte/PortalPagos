@@ -48,7 +48,7 @@ public class SeedersConfig implements ApplicationListener<ContextRefreshedEvent>
             // Seeder de usuarios del sistema
             Usuario admin = new Usuario("00000000", "admin@admin", "admin", "admin", "123", adminRol);
             Usuario cliente1 = new Usuario("14169649", "empleado77@empresa1.com", "Luis", "Monterroso", "123", clienteRol);
-            Usuario cliente2 = new Usuario("38800926", "empleada90@empresa2com", "Maria", "Yox", "123", clienteRol);
+            Usuario cliente2 = new Usuario("38800926", "empleada90@empresa2.com", "Maria", "Yox", "123", clienteRol);
             
             cliente1.setSaldo(new Saldo(10000.0));
             cliente2.setSaldo(new Saldo(10000.0));

@@ -4,11 +4,13 @@
  */
 package ss1.api.services;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import ss1.api.excepciones.UnauthorizedException;
 import ss1.api.models.Usuario;
 import ss1.api.services.tools.Validador;
+import ss1.api.tools.ManejadorMoneda;
 
 /**
  *
@@ -16,6 +18,9 @@ import ss1.api.services.tools.Validador;
  */
 @org.springframework.stereotype.Service
 public class Service extends Validador {
+
+    @Autowired
+    protected ManejadorMoneda manejadorMoneda;
 
     /**
      * Verifica si el usuario autenticado tiene permiso para realizar acciones
