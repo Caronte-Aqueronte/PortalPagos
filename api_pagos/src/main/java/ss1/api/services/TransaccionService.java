@@ -10,9 +10,12 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Random;
 import javax.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 import ss1.api.excepciones.ConflictException;
 import ss1.api.excepciones.NotFoundException;
@@ -23,6 +26,7 @@ import ss1.api.models.Usuario;
 import ss1.api.models.dto.TransaccionDTO;
 import ss1.api.models.request.PagoExternoRequest;
 import ss1.api.models.request.PagoRequest;
+import ss1.api.reportes.printers.ComprobantePrinter;
 import ss1.api.repositories.TransaccionRepository;
 import ss1.api.tools.ManejadorTiempo;
 
@@ -38,6 +42,20 @@ public class TransaccionService extends Service {
     @Value("${externo.servicio.urlTiendaB}")
     private String urlTiendaB;
 
+    //temporal
+    String[] domains = {
+        "amazon.com",
+        "ebay.com",
+        "alibaba.com",
+        "etsy.com",
+        "walmart.com",
+        "mercadolibre.com",
+        "shopify.com",
+        "rakuten.com",
+        "target.com",
+        "bestbuy.com"
+    };
+
     @Autowired
     private TransaccionRepository transaccionRepository;
     @Autowired
@@ -48,6 +66,8 @@ public class TransaccionService extends Service {
     private SaldoService saldoService;
     @Autowired
     private TransaccionFallidaService transaccionFallidaService;
+    @Autowired
+    private ComprobantePrinter comprobantePrinter;
 
     /**
      * Procesa un pago entre un emisor y un receptor. Verifica si el emisor
@@ -123,28 +143,50 @@ public class TransaccionService extends Service {
 
     @Transactional(rollbackOn = Exception.class)
     public byte[] pagarGetComprobante(PagoExternoRequest pago) throws NotFoundException,
-            ConflictException {
+            ConflictException, Exception {
         validarModelo(pago);
-        Transaccion guardarTransaccion = procesarPago(pago);
 
         // Inicializar el RestTemplate para realizar la solicitud GET
         RestTemplate restTemplate = new RestTemplate();
         String url;
 
+        //TEMPORAL OBTENCION DE UN LOGO EN SERVICIO EXTERNO
+        Random random = new Random();
+        int randomIndex = random.nextInt(domains.length);
+
         //mandar a traer la informacion de la tienda segun su identificadorF
         switch (pago.getIdentificadorTienda()) {
             case "a":
-                url = urlTiendaA;
+                url = urlTiendaA + "/" + domains[randomIndex];
                 break;
             case "b":
                 url = urlTiendaB;
+                break;
             default:
                 throw new NotFoundException("Tienda no reconocida.");
 
         }
 
-        //mandamos a traer la imagen de la tienda
-        return null;
+        //ahora debemos hacer la peticion get para conseguir la imagen de la tienda
+        ResponseEntity<byte[]> response = restTemplate.getForEntity(url, byte[].class);
+
+        byte[] imagenTienda;
+
+        // Verificar si la respuesta es exitosa (200 OK)
+        if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
+            imagenTienda = response.getBody(); // Devolver el byte array de la imagen
+        } else {
+            throw new NotFoundException("No se pudo obtener la informacion de la tienda.");
+        }
+
+        //procesar el pago
+        Transaccion guardarTransaccion = procesarPago(pago);
+
+        //mandamos a imprimir el comprobante de pago y retornamos
+        return this.comprobantePrinter.init(
+                constuirTransaccionDTO(guardarTransaccion),
+                pago.getNombreTienda(),
+                imagenTienda);
     }
 
     /**
