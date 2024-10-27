@@ -17,7 +17,7 @@
         <!-- Saldo disponible -->
         <div class="mb-6">
             <p class="text-lg text-gray-500">Saldo disponible:</p>
-            <p class="text-3xl font-semibold text-gray-800">Q1,200.00</p>
+            <p class="text-3xl font-semibold text-gray-800">Q{{saldoUsuario}}</p>
         </div>
 
         <!-- Botón para retirar dinero -->
@@ -28,35 +28,15 @@
         </button>
     </div>
 
-    <!-- Transacciones recientes (lado derecho) -->
+    <!-- Transacciones recientes (lado derecho) con scroll interno -->
     <div class="w-full lg:w-2/3 bg-white shadow-lg rounded-lg p-6">
         <h2 class="text-xl font-bold text-gray-700 mb-4">Transacciones recientes</h2>
 
-        <ul class="space-y-4">
-            <!-- Transacción 1 -->
-            <li class="flex justify-between items-center bg-gray-100 p-4 rounded-lg">
-                <div class="flex items-center space-x-4">
-                    <fa-icon [icon]="['fas', 'exchange-alt']" class="h-6 w-6 text-gray-500"></fa-icon>
-                    <div>
-                        <p class="text-sm font-semibold text-gray-700">Pago recibido</p>
-                        <p class="text-xs text-gray-500">01/10/2024</p>
-                    </div>
-                </div>
-                <p class="text-lg font-semibold text-green-600">+ $500.00</p>
-            </li>
-
-            <!-- Transacción 2 -->
-            <li class="flex justify-between items-center bg-gray-100 p-4 rounded-lg">
-                <div class="flex items-center space-x-4">
-                    <fa-icon [icon]="['fas', 'exchange-alt']" class="h-6 w-6 text-gray-500"></fa-icon>
-                    <div>
-                        <p class="text-sm font-semibold text-gray-700">Compra realizada</p>
-                        <p class="text-xs text-gray-500">29/09/2024</p>
-                    </div>
-                </div>
-                <p class="text-lg font-semibold text-red-600">- $200.00</p>
-            </li>
-
+        <!-- Contenedor de transacciones con scroll -->
+        <ul class="space-y-4 max-h-80 overflow-y-auto">
+            <div *ngFor="let transaccion of transacciones" class="mt-4">
+                <app-transaction-item [transaccion]="transaccion"></app-transaction-item>
+            </div>
         </ul>
     </div>
     <!-- Popup de transferencia -->
@@ -80,7 +60,7 @@
                 <div class="mb-4">
                     <label for="correoReceptor" class="block text-sm font-medium text-gray-700">Email de destino</label>
                     <input id="correoReceptor" formControlName="correoReceptor" type="email"
-                        class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
+                        class="appearance-none block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
                     <div *ngIf="transferForm.get('correoReceptor')?.invalid && transferForm.get('correoReceptor')?.touched"
                         class="text-red-600 text-sm">
                         Debes ingresar un email válido.
@@ -91,7 +71,7 @@
                 <div class="mb-4">
                     <label for="cantidad" class="block text-sm font-medium text-gray-700">Cantidad a transferir</label>
                     <input id="cantidad" formControlName="cantidad" type="number"
-                        class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
+                        class="appearance-none block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
                     <div *ngIf="transferForm.get('cantidad')?.invalid && transferForm.get('cantidad')?.touched"
                         class="text-red-600 text-sm">
                         La cantidad debe ser mayor a 0.
@@ -102,7 +82,7 @@
                 <div class="mb-4">
                     <label for="concepto" class="block text-sm font-medium text-gray-700">Concepto</label>
                     <input id="concepto" formControlName="concepto" type="text"
-                        class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
+                        class="appearance-none block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
                     <div *ngIf="transferForm.get('concepto')?.invalid && transferForm.get('concepto')?.touched"
                         class="text-red-600 text-sm">
                         El concepto es obligatorio y debe tener menos de 300 caracteres.

@@ -20,6 +20,16 @@ export class UsuarioService {
     return this.http.post(url, body);
   }
 
+  crearUsuario(body: any): Observable<any> {
+    const url = `${this.apiPublic}/crearUsuario`; // Agrega el endpoint específico
+    return this.http.post(url, body);
+  }
+
+  eliminarMiUsuario(body: any): Observable<any> {
+    const url = `${this.apiProtected}/eliminarMiUsuario`;
+    return this.http.request('DELETE', url, { body }); // Enviar el body en una solicitud DELETE
+  }
+
   // Método para editarPerfil
   editarPerfil(body: any): Observable<any> {
     const url = `${this.apiProtected}/editarPerfil`; // Agrega el endpoint específico

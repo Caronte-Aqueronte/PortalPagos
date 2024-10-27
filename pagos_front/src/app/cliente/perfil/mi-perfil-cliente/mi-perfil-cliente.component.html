@@ -1,23 +1,21 @@
 <div class="min-h-screen flex flex-col lg:flex-row-reverse gap-4 p-6">
     <!-- Menú lateral derecho -->
-    <div class="w-full lg:w-64 bg-white shadow-lg rounded-lg p-6 lg:fixed right-0">
+    <div class="w-full lg:w-64 bg-white shadow-lg rounded-lg p-6 lg:sticky lg:top-20 lg:self-start">
         <div class="flex items-center justify-center h-16 bg-gray-300 text-lg font-bold space-x-2">
             <!-- Título del menú -->
             <span>Panel de Perfil</span>
         </div>
 
         <nav class="flex-1 px-2 py-4 space-y-1">
-
-            <!-- Opción 2: Centro de Cuentas Bancarias -->
+            <!-- Opción 1: Información de Perfil -->
             <a routerLink="info"
                 class="group flex items-center px-2 py-2 text-sm font-medium rounded-md hover:bg-blue-500 hover:text-white">
-
                 <fa-icon [icon]="['fas', 'user-circle']"
                     class="h-6 w-6 mr-3 text-gray-500 group-hover:text-white"></fa-icon>
                 Información de Perfil
             </a>
 
-            <!-- Opción 1: Eliminar Perfil -->
+            <!-- Opción 2: Eliminar Perfil -->
             <a routerLink="borrar"
                 class="group flex items-center px-2 py-2 text-sm font-medium rounded-md hover:bg-red-500 hover:text-white">
                 <fa-icon [icon]="['fas', 'trash-alt']"
@@ -25,7 +23,7 @@
                 Eliminar mi perfil
             </a>
 
-            <!-- Opción 2: Centro de Cuentas Bancarias -->
+            <!-- Opción 3: Centro de Cuentas Bancarias -->
             <a routerLink="centro_cuentas"
                 class="group flex items-center px-2 py-2 text-sm font-medium rounded-md hover:bg-blue-500 hover:text-white">
                 <fa-icon [icon]="['fas', 'university']"

@@ -18,6 +18,12 @@ import { CentroCuentasComponent } from './cliente/perfil/centro-cuentas/centro-c
 import { EliminarCuentaClienteComponent } from './cliente/perfil/eliminar-cuenta-cliente/eliminar-cuenta-cliente.component';
 import { InfoComponent } from './cliente/perfil/info/info.component';
 import { SuccessAlertComponent } from './alerts/success-alert/success-alert.component';
+import { TransactionItemComponent } from './cliente/transaction-item/transaction-item.component';
+import { IngresosEgresosComponent } from './cliente/ingresos-egresos/ingresos-egresos.component';
+import { FormsModule } from '@angular/forms';
+import { CrearUsuarioComponent } from './auth/crear-usuario/crear-usuario.component';
+import { ToastrModule } from 'ngx-toastr';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 @NgModule({
   declarations: [
@@ -31,6 +37,9 @@ import { SuccessAlertComponent } from './alerts/success-alert/success-alert.comp
     EliminarCuentaClienteComponent,
     InfoComponent,
     SuccessAlertComponent,
+    TransactionItemComponent,
+    IngresosEgresosComponent,
+    CrearUsuarioComponent,
   ],
   imports: [
     BrowserModule,
@@ -38,6 +47,13 @@ import { SuccessAlertComponent } from './alerts/success-alert/success-alert.comp
     ReactiveFormsModule,
     HttpClientModule,
     FontAwesomeModule,
+    FormsModule,
+    BrowserAnimationsModule,
+    ToastrModule.forRoot({
+      timeOut: 3000, // Duración de los mensajes
+      positionClass: 'toast-top-right', // Posición
+      preventDuplicates: true, // Evita mensajes duplicados
+    }),
   ],
   providers: [
     {

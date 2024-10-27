@@ -7,6 +7,8 @@ import { MiPerfilClienteComponent } from './cliente/perfil/mi-perfil-cliente/mi-
 import { EliminarCuentaClienteComponent } from './cliente/perfil/eliminar-cuenta-cliente/eliminar-cuenta-cliente.component';
 import { CentroCuentasComponent } from './cliente/perfil/centro-cuentas/centro-cuentas.component';
 import { InfoComponent } from './cliente/perfil/info/info.component';
+import { IngresosEgresosComponent } from './cliente/ingresos-egresos/ingresos-egresos.component';
+import { CrearUsuarioComponent } from './auth/crear-usuario/crear-usuario.component';
 
 const routes: Routes = [
   {
@@ -22,12 +24,20 @@ const routes: Routes = [
     component: LoginComponent,
   },
   {
+    path: 'crear_usuario',
+    component: CrearUsuarioComponent,
+  },
+  {
     path: 'dashboard-cliente',
     component: DashClienteComponent,
     children: [
       {
         path: 'inicio',
         component: InicioClientePageComponent,
+      },
+      {
+        path: 'ingresos_egresos',
+        component: IngresosEgresosComponent,
       },
       {
         path: 'perfil',
