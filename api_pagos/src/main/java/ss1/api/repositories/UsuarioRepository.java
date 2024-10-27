@@ -20,6 +20,8 @@ public interface UsuarioRepository extends CrudRepository<Usuario, Long> {
 
     public Optional<Usuario> findOneByNit(String nit);
 
+    public boolean existsByEmail(String email);
+
     // Consultar solo productos que no estén eliminados (soft deleted)
     @Query("SELECT p FROM Usuario p WHERE p.deleted = false")
     public List<Usuario> findAllActive();
