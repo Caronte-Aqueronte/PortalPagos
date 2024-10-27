@@ -11,7 +11,7 @@ package ss1.api.models.dto;
 public class TransaccionDTO {
 
     private Long id;  // ID de la transacción
-    private Double monto;  // Monto transferido
+    private String monto;  // Monto transferido
     private String concepto;  // Concepto de la transacción
     private String emisor;  // Correo del emisor
     private String receptor;  // Correo del receptor
@@ -28,7 +28,7 @@ public class TransaccionDTO {
      * @param receptor El correo del usuario que recibe los fondos.
      * @param fechaTransaccion La fecha y hora en que se realizó la transacción.
      */
-    public TransaccionDTO(Long id, Double monto, String concepto, String emisor,
+    public TransaccionDTO(Long id, String monto, String concepto, String emisor,
             String receptor, String fechaTransaccion) {
         this.id = id;
         this.monto = monto;
@@ -36,6 +36,9 @@ public class TransaccionDTO {
         this.emisor = emisor;
         this.receptor = receptor;
         this.fechaTransaccion = fechaTransaccion;
+    }
+
+    public TransaccionDTO() {
     }
 
     /**
@@ -61,7 +64,7 @@ public class TransaccionDTO {
      *
      * @return El monto de la transacción.
      */
-    public Double getMonto() {
+    public String getMonto() {
         return monto;
     }
 
@@ -70,7 +73,7 @@ public class TransaccionDTO {
      *
      * @param monto El monto a establecer para la transacción.
      */
-    public void setMonto(Double monto) {
+    public void setMonto(String monto) {
         this.monto = monto;
     }
 

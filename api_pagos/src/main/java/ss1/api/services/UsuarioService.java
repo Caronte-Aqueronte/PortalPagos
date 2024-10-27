@@ -19,6 +19,7 @@ import ss1.api.excepciones.UnauthorizedException;
 import ss1.api.models.Rol;
 import ss1.api.models.dto.LoginDTO;
 import ss1.api.models.Usuario;
+import ss1.api.models.dto.ExistEmailDTO;
 import ss1.api.models.request.EditarPasswordRequest;
 import ss1.api.models.request.EditarPerfilRequest;
 import ss1.api.models.request.LoginRequest;
@@ -239,6 +240,15 @@ public class UsuarioService extends ss1.api.services.Service {
         // Verificar que el usuario autenticado coincide con el usuario que se intenta eliminar
         this.verificarUsuarioJwt(usuario);
         return usuario;
+    }
+
+    public ExistEmailDTO existeEmail(String email) throws BadRequestException {
+        //vemos que el email no venga nulo
+        if (email == null) {
+            throw new BadRequestException("EL email no puede ser nulo.");
+        }
+        Boolean tieneCuenta = usuarioRepository.existsByEmail(email);
+        return new ExistEmailDTO(tieneCuenta);
     }
 
     public Usuario editarPassword(EditarPasswordRequest usuarioEditar) throws BadRequestException,

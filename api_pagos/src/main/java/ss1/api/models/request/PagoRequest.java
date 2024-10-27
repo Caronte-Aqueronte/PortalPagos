@@ -30,6 +30,15 @@ public class PagoRequest {
     @Length(max = 300, message = "El concepto debe tener entre 1 y 300 caracteres.")
     private String concepto;
 
+    public PagoRequest(Double cantidad, String correoReceptor, String concepto) {
+        this.cantidad = cantidad;
+        this.correoReceptor = correoReceptor;
+        this.concepto = concepto;
+    }
+
+    public PagoRequest() {
+    }
+
     // Getters y setters
     public Double getCantidad() {
         return cantidad;
