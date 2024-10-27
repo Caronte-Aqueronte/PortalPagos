@@ -98,7 +98,8 @@ public class TransaccionService extends Service {
 
         //verificamos que el usuario tenga salgo
         boolean usuarioTieneSaldo = saldoService.usuarioTieneSaldo(emisor);
-        boolean usuarioTieneSaldoSuficiente = saldoService.usuarioTieneSaldoSuficiente(receptor,
+
+        boolean usuarioTieneSaldoSuficiente = saldoService.usuarioTieneSaldoSuficiente(emisor,
                 pago.getCantidad());
 
         if (!usuarioTieneSaldo || !usuarioTieneSaldoSuficiente) {

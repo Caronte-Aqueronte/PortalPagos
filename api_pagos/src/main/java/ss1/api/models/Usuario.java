@@ -15,6 +15,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -40,22 +41,12 @@ import org.hibernate.annotations.DynamicUpdate;
 public class Usuario extends Auditor {
 
     /**
-     * El NIT del usuario. Este campo es obligatorio, debe ser único y tiene
-     * entre 6 y 12 caracteres. El valor máximo de almacenamiento es de 13
-     * caracteres.
-     */
-    @NotBlank(message = "El nit del cliente no puede estar vacío.")
-    @NotNull(message = "El nit del cliente no puede ser nulo")
-    @Size(min = 6, max = 12, message = "El nit del cliente debe tener entre 6 y 12 caracteres.")
-    @Column(length = 13, unique = true, nullable = false)
-    private String nit;
-
-    /**
      * El email del usuario. Es obligatorio y debe tener entre 1 y 250
      * caracteres.
      */
     @NotBlank(message = "El email del cliente no puede estar vacío.")
     @NotNull(message = "El email del cliente no puede ser nulo")
+    @Email(message = "El email debe ser un correo electrónico válido.")
     @Size(min = 1, max = 250, message = "El email del cliente debe tener entre 1 y 250 caracteres.")
     @Column(length = 250)
     private String email;
@@ -159,8 +150,7 @@ public class Usuario extends Auditor {
      * @param password la contraseña del usuario
      * @param rol el rol asociado al usuario
      */
-    public Usuario(String nit, String email, String nombres, String apellidos, String password, Rol rol) {
-        this.nit = nit;
+    public Usuario(String email, String nombres, String apellidos, String password, Rol rol) {
         this.email = email;
         this.nombres = nombres;
         this.apellidos = apellidos;
@@ -176,24 +166,6 @@ public class Usuario extends Auditor {
      * Constructor por defecto para la clase Usuario.
      */
     public Usuario() {
-    }
-
-    /**
-     * Obtiene el NIT del usuario.
-     *
-     * @return el NIT del usuario
-     */
-    public String getNit() {
-        return nit;
-    }
-
-    /**
-     * Establece el NIT del usuario.
-     *
-     * @param nit el NIT a establecer
-     */
-    public void setNit(String nit) {
-        this.nit = nit;
     }
 
     /**

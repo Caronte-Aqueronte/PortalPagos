@@ -9,6 +9,8 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import java.util.HashMap;
+import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,6 +27,7 @@ import ss1.api.models.dto.ExistEmailDTO;
 import ss1.api.models.dto.LoginDTO;
 import ss1.api.models.request.EditarPasswordRequest;
 import ss1.api.models.request.EditarPerfilRequest;
+import ss1.api.models.request.EliminarMiUsuarioRequest;
 import ss1.api.models.request.LoginRequest;
 import ss1.api.services.UsuarioService;
 
@@ -89,12 +92,14 @@ public class UsuarioController {
                 content = @Content(mediaType = "application/json", schema = @Schema(implementation = String.class))),
         @ApiResponse(responseCode = "500", description = "Error interno del servidor", content = @Content)
     })
-    @DeleteMapping("/protected/eliminarUsuario")
-    public ResponseEntity<?> eliminarUsuario(@RequestBody Usuario usuario) {
+    @DeleteMapping("/protected/eliminarMiUsuario")
+    public ResponseEntity<?> eliminarUsuario(@RequestBody EliminarMiUsuarioRequest req) {
         // Llamar al servicio para crear el usuario
-        String nuevoUsuario = usuarioService.eliminarUsuario(usuario);
+        String nuevoUsuario = usuarioService.eliminarMiUsuario(req);
+        Map<String, String> response = new HashMap<>();
+        response.put("message", nuevoUsuario);
         // Si todo está correcto, devolver la respuesta 201 Created con el usuario creado
-        return ResponseEntity.status(HttpStatus.OK).body(nuevoUsuario);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
     @Operation(summary = "Obtener usuario por ID",
