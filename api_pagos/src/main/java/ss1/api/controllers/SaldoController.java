@@ -9,14 +9,19 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import java.util.HashMap;
+import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ss1.api.models.dto.SaldoDTO;
+import ss1.api.models.request.MovimientoExternoRequest;
 import ss1.api.services.SaldoService;
 
 /**
@@ -56,5 +61,21 @@ public class SaldoController {
     public ResponseEntity<?> getMiSaldo(@PathVariable Long idUsuario) {
         SaldoDTO data = saldoService.getMiSaldo(idUsuario);
         return ResponseEntity.status(HttpStatus.OK).body(data);
+    }
+
+    @PatchMapping("/protected/recargar")
+    public ResponseEntity<?> recargar(@RequestBody MovimientoExternoRequest recarga) {
+        String data = saldoService.recargarSaldo(recarga);
+        Map<String, String> response = new HashMap<>();
+        response.put("message", data);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+    @PatchMapping("/protected/retirar")
+    public ResponseEntity<?> retirar(@RequestBody MovimientoExternoRequest recarga) {
+        String data = saldoService.retirarSaldo(recarga);
+        Map<String, String> response = new HashMap<>();
+        response.put("message", data);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 }

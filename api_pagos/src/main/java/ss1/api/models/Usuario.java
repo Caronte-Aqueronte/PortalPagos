@@ -140,6 +140,12 @@ public class Usuario extends Auditor {
     @Schema(hidden = true)
     private List<TransaccionFallida> transaccionesFallidas;
 
+    @OneToMany(mappedBy = "usuario", orphanRemoval = true)
+    @Cascade(org.hibernate.annotations.CascadeType.ALL)
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    @Schema(hidden = true)
+    private List<Recarga> recargas;
+
     /**
      * Constructor para inicializar un objeto Usuario con todos los atributos.
      *
@@ -322,6 +328,14 @@ public class Usuario extends Auditor {
 
     public void setTransaccionesRecibidas(List<Transaccion> transaccionesRecibidas) {
         this.transaccionesRecibidas = transaccionesRecibidas;
+    }
+
+    public List<Recarga> getRecargas() {
+        return recargas;
+    }
+
+    public void setRecargas(List<Recarga> recargas) {
+        this.recargas = recargas;
     }
 
 }

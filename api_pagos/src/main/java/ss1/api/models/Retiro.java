@@ -11,10 +11,10 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 /**
- * La clase Retiro representa una operación en la que un usuario
- * retira fondos de su cuenta en el portal de pagos hacia una cuenta bancaria o
- * tarjeta de crédito. Durante la movilización de fondos, se calcula una
- * comisión que se descuenta del monto retirado.
+ * La clase Retiro representa una operación en la que un usuario retira fondos
+ * de su cuenta en el portal de pagos hacia una cuenta bancaria o tarjeta de
+ * crédito. Durante la movilización de fondos, se calcula una comisión que se
+ * descuenta del monto retirado.
  *
  * La clase extiende de Auditor, lo que implica que incluye características de
  * auditoría como la fecha de creación y modificación.
@@ -100,11 +100,22 @@ public class Retiro extends Auditor {
 
     /**
      * Método privado para calcular la comisión y el monto final transferido. La
-     * comisión es el 1.3% del monto retirado.
+     * comisión es el 1.3% del monto retirado. Los resultados se redondean a dos
+     * decimales.
      */
     private void calcularComisionYMontoFinal() {
-        this.comision = this.montoRetirado * PORCENTAJE_COMISION;
-        this.montoFinalTransferido = this.montoRetirado - this.comision;
+        this.comision = redondearDosDecimales(this.montoRetirado * PORCENTAJE_COMISION);
+        this.montoFinalTransferido = redondearDosDecimales(this.montoRetirado - this.comision);
+    }
+
+    /**
+     * Método auxiliar para redondear un valor Double a dos decimales.
+     *
+     * @param valor El valor a redondear.
+     * @return El valor redondeado a dos decimales.
+     */
+    private Double redondearDosDecimales(Double valor) {
+        return Math.round(valor * 100.0) / 100.0;
     }
 
     // Getters y Setters
