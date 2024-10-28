@@ -21,8 +21,15 @@
         </div>
 
         <!-- Botón para retirar dinero -->
-        <button
-            class="w-full bg-indigo-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-indigo-700 focus:outline-none">
+        <button (click)="openDialog('Recargar')"
+            class="w-full bg-green-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-green-700 focus:outline-none mb-6">
+            <fa-icon [icon]="['fas', 'money-bill-trend-up']" class="mr-2"></fa-icon>
+            Recargar dinero
+        </button>
+
+        <!-- Botón para retirar dinero -->
+        <button (click)="openDialog('Retirar')"
+            class="w-full bg-red-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-red-700 focus:outline-none">
             <fa-icon [icon]="['fas', 'money-bill']" class="mr-2"></fa-icon>
             Retirar dinero
         </button>
@@ -103,6 +110,83 @@
 
 
     </div>
+
+
+    <!-- Diálogo de Recarga/Retiro -->
+    <div class="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center z-50" *ngIf="showDialog">
+        <div class="bg-white p-6 rounded-lg shadow-lg max-w-md w-full relative">
+            <!-- Botón de cerrar -->
+            <button class="absolute top-2 right-2 text-gray-500 hover:text-gray-700" (click)="closeDialog()">
+                <fa-icon [icon]="['fas', 'times']" class="h-6 w-6"></fa-icon>
+            </button>
+
+            <!-- Título y tipo de operación -->
+            <h2 class="text-xl font-bold text-gray-800 mb-4 text-center">{{ operationType }}</h2>
+
+            <!-- Formulario de recarga/retiro -->
+            <form [formGroup]="externoForm" (ngSubmit)="submitTransaction()">
+                <!-- Selección de tipo de operación (Recargar o Retirar) -->
+                <div class="mb-4">
+                    <label for="operation" class="block text-sm font-medium text-gray-700">Operación</label>
+                    <select id="operation" formControlName="operationType"
+                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                        <option value="Recargar">Recargar</option>
+                        <option value="Retirar">Retirar</option>
+                    </select>
+                </div>
+
+                <!-- Campo de correo electrónico -->
+                <div class="mb-4">
+                    <label for="email" class="block text-sm font-medium text-gray-700">Correo Electrónico en tu
+                        banco</label>
+                    <input type="email" id="email" formControlName="email"
+                        class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                </div>
+
+                <!-- Campo de contraseña -->
+                <div class="mb-4">
+                    <label for="password" class="block text-sm font-medium text-gray-700">Contraseña en tu banco</label>
+                    <input type="password" id="password" formControlName="pin"
+                        class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                </div>
+
+                <!-- Campo de monto -->
+                <div class="mb-4">
+                    <label for="amount" class="block text-sm font-medium text-gray-700">Monto a {{ operationType
+                        }}</label>
+                    <input type="number" id="amount" formControlName="monto"
+                        class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                </div>
+
+                <!-- Selección de tipo de cuenta (Crédito o Débito) -->
+                <div class="mb-4">
+                    <label for="accountType" class="block text-sm font-medium text-gray-700">Tipo de Cuenta</label>
+                    <select id="accountType" formControlName="banco"
+                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                        <option value="credito">Crédito</option>
+                        <option value="debito">Débito</option>
+                    </select>
+                </div>
+
+                <!-- Botón de enviar -->
+
+                <div class="flex justify-end">
+                    <button type="submit"
+                        class="px-4 py-2 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-offset-2"
+                        [ngClass]="{
+            'bg-indigo-600 hover:bg-indigo-700 focus:ring-indigo-500': externoForm.valid,
+            'bg-gray-400 cursor-not-allowed': externoForm.invalid
+        }" [disabled]="externoForm.invalid">
+
+                        <fa-icon [icon]="['fas', 'paper-plane']" class="mr-2"></fa-icon>
+                        Confirmar {{ operationType }}
+                    </button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+
 
     <!-- Componente de alerta de error -->
     <app-error-alert [message]="errorMessage" (close)="closeErrorAlert()"></app-error-alert>
