@@ -5,10 +5,13 @@ import { DashClienteComponent } from './cliente/dash-cliente/dash-cliente.compon
 import { InicioClientePageComponent } from './cliente/inicio-cliente-page/inicio-cliente-page.component';
 import { MiPerfilClienteComponent } from './cliente/perfil/mi-perfil-cliente/mi-perfil-cliente.component';
 import { EliminarCuentaClienteComponent } from './cliente/perfil/eliminar-cuenta-cliente/eliminar-cuenta-cliente.component';
-import { CentroCuentasComponent } from './cliente/perfil/centro-cuentas/centro-cuentas.component';
 import { InfoComponent } from './cliente/perfil/info/info.component';
 import { IngresosEgresosComponent } from './cliente/ingresos-egresos/ingresos-egresos.component';
 import { CrearUsuarioComponent } from './auth/crear-usuario/crear-usuario.component';
+import { DashAdminComponent } from './admin/dash-admin/dash-admin.component';
+import { MiPerfilAdminComponent } from './admin/perfil/mi-perfil-admin/mi-perfil-admin.component';
+import { ReportesComponent } from './admin/reportes/reportes.component';
+import { UsuariosComponent } from './admin/usuarios/usuarios.component';
 
 const routes: Routes = [
   {
@@ -28,6 +31,20 @@ const routes: Routes = [
     component: CrearUsuarioComponent,
   },
   {
+    path: 'admin-dashboard',
+    component: DashAdminComponent,
+    children: [
+      {
+        path: 'perfil',
+        component: MiPerfilAdminComponent,
+
+        children: [{ path: 'info', component: InfoComponent }],
+      },
+      { path: 'usuarios', component: UsuariosComponent },
+      { path: 'reportes', component: ReportesComponent },
+    ],
+  },
+  {
     path: 'dashboard-cliente',
     component: DashClienteComponent,
     children: [
@@ -45,7 +62,6 @@ const routes: Routes = [
 
         children: [
           { path: 'borrar', component: EliminarCuentaClienteComponent },
-          { path: 'centro_cuentas', component: CentroCuentasComponent },
           { path: 'info', component: InfoComponent },
         ],
       },

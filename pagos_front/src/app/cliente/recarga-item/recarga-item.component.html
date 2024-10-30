@@ -1,0 +1,16 @@
+<li class="flex flex-wrap justify-between items-center bg-gray-100 p-4 rounded-lg">
+    <div class="flex items-center space-x-4">
+        <fa-icon [icon]="['fas', 'piggy-bank']" class="h-6 w-6 text-green-500"></fa-icon>
+        <div class="w-full md:w-auto">
+            <!-- Usuario y entidad financiera -->
+            <p class="text-sm font-semibold text-gray-700 truncate">{{ recarga.usuario }}</p>
+            <p class="text-xs text-gray-500 truncate w-48 md:w-auto">{{ recarga.entidadFinanciera }}</p>
+            <!-- Fecha de la recarga -->
+            <p class="text-xs text-gray-500">{{ recarga.fecha }}</p>
+        </div>
+    </div>
+    <!-- Monto recargado -->
+    <p class="text-lg font-semibold text-green-600">
+        + Q{{ recarga.montoRecargado }}
+    </p>
+</li>

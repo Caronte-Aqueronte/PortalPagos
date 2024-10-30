@@ -23,22 +23,28 @@
             </ul>
         </div>
 
+        <div class="bg-white shadow-lg rounded-lg p-6">
+            <h2 class="text-lg font-bold text-gray-700 mb-4">Recargas</h2>
+            <ul class="space-y-4 max-h-80 overflow-y-auto">
+                <div *ngFor="let recarga of recargas" class="mt-4">
+                    <app-recarga-item [recarga]="recarga"></app-recarga-item>
+                </div>
+            </ul>
+        </div>
 
 
-        <!-- Sección de retiros (debajo de egresos) -->
         <div class="bg-white shadow-lg rounded-lg p-6">
             <h2 class="text-lg font-bold text-gray-700 mb-4">Retiros</h2>
-
             <ul class="space-y-4 max-h-80 overflow-y-auto">
                 <div *ngFor="let retiro of retiros" class="mt-4">
-                    <app-transaction-item [transaccion]="retiro"></app-transaction-item>
+                    <app-retiro-item [retiro]="retiro"></app-retiro-item>
                 </div>
             </ul>
         </div>
     </div>
 
     <!-- Sección de filtros y gráficos (centro) -->
-    <div class="w-full lg:w-3/5 bg-white shadow-lg rounded-lg p-6 flex flex-col">
+    <div class="w-full lg:w-3/5 bg-white shadow-lg rounded-lg p-6 flex flex-col" style="max-height: 700px;">
         <!-- Filtros de fecha -->
         <div class="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4 mb-4">
             <!-- Fecha inicio -->
@@ -65,10 +71,15 @@
             </button>
         </div>
 
-        <!-- Contenedor de gráficos -->
-        <div class="flex-1 bg-gray-100 rounded-lg p-4 flex items-center justify-center mt-6">
-            <!-- Aquí puedes insertar tu componente de gráficos -->
-            <h3 class="text-lg font-semibold text-gray-600">Gráfica de Movimientos</h3>
+        <!-- Contenedor de gráficos con scroll -->
+        <div class="flex-1 bg-gray-100 rounded-lg p-4 flex items-center justify-center mt-6 overflow-auto">
+            <div class="w-full max-w-xs md:max-w-sm lg:max-w-md xl:max-w-lg">
+                <ngx-charts-advanced-pie-chart [results]="chartData" [view]="view" [scheme]="colorScheme"
+                    [gradient]="gradient" [animations]="animations">
+                </ngx-charts-advanced-pie-chart>
+            </div>
         </div>
+
+
     </div>
 </div>

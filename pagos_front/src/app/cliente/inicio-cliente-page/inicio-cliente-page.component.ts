@@ -4,6 +4,8 @@ import { TransaccionService } from '../../services/transaccion.service';
 import { AuthService } from '../../services/auth.service';
 import { SaldoService } from '../../services/saldo.service';
 import { ToastrService } from 'ngx-toastr';
+import { RetiroService } from '../../services/retiro.service';
+import { RecargaService } from '../../services/recarga.service';
 
 @Component({
   selector: 'app-inicio-cliente-page',
@@ -21,13 +23,17 @@ export class InicioClientePageComponent implements OnInit {
   errorMessage: string | null = null;
   successMessage: string | null = null;
   transacciones: any;
+  retiros: any;
+  recargas: any;
 
   constructor(
     private fb: FormBuilder,
     private transaccionService: TransaccionService,
     private authService: AuthService,
     private saldoService: SaldoService,
-    private toastr: ToastrService
+    private toastr: ToastrService,
+    private retiroService: RetiroService,
+    private recargaServie: RecargaService
   ) {
     // Inicializar el formulario reactivo de transferencia
     this.transferForm = this.fb.group({
@@ -59,6 +65,41 @@ export class InicioClientePageComponent implements OnInit {
   ngOnInit(): void {
     this.getSaldoDelUsuario();
     this.getTransaccionesDelUsuario();
+    this.getRetirosDelUsuario();
+    this.getRecargasDelUsuario();
+  }
+
+  getRetirosDelUsuario() {
+    this.retiroService.getMis20RetirosMasRecientes().subscribe(
+      (response: any) => {
+        this.retiros = response;
+      },
+      (error: any) => {
+        if (error.error) {
+          this.toastr.error(error.error, 'Error');
+        } else {
+          this.toastr.error('Error desconocido', 'Error');
+        }
+      }
+    );
+  }
+
+  getRecargasDelUsuario() {
+    //obtneer id
+    var id = this.authService.getUser().id;
+
+    this.recargaServie.getMisUltimos20Recargas().subscribe(
+      (response: any) => {
+        this.recargas = response;
+      },
+      (error: any) => {
+        if (error.error) {
+          this.toastr.error(error.error, 'Error');
+        } else {
+          this.toastr.error('Error desconocido', 'Error');
+        }
+      }
+    );
   }
 
   getTransaccionesDelUsuario() {
@@ -180,6 +221,7 @@ export class InicioClientePageComponent implements OnInit {
           `Recarga realizada exitosamente por Q${body.monto}`,
           'Éxito'
         );
+        this.getRecargasDelUsuario();
       },
       error: (err) => {
         // Manejo del error, muestra el mensaje adecuado
@@ -198,6 +240,7 @@ export class InicioClientePageComponent implements OnInit {
           `Retiro realizado exitosamente por Q${body.monto}`,
           'Éxito'
         );
+        this.getRetirosDelUsuario();
       },
       error: (err) => {
         // Manejo del error, muestra el mensaje adecuado

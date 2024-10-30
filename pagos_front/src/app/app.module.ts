@@ -14,7 +14,6 @@ import { FaIconLibrary } from '@fortawesome/angular-fontawesome';
 import { fas } from '@fortawesome/free-solid-svg-icons';
 import { InicioClientePageComponent } from './cliente/inicio-cliente-page/inicio-cliente-page.component';
 import { MiPerfilClienteComponent } from './cliente/perfil/mi-perfil-cliente/mi-perfil-cliente.component';
-import { CentroCuentasComponent } from './cliente/perfil/centro-cuentas/centro-cuentas.component';
 import { EliminarCuentaClienteComponent } from './cliente/perfil/eliminar-cuenta-cliente/eliminar-cuenta-cliente.component';
 import { InfoComponent } from './cliente/perfil/info/info.component';
 import { SuccessAlertComponent } from './alerts/success-alert/success-alert.component';
@@ -24,6 +23,13 @@ import { FormsModule } from '@angular/forms';
 import { CrearUsuarioComponent } from './auth/crear-usuario/crear-usuario.component';
 import { ToastrModule } from 'ngx-toastr';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { RecargaItemComponent } from './cliente/recarga-item/recarga-item.component';
+import { RetiroItemComponent } from './cliente/retiro-item/retiro-item.component';
+import { NgxChartsModule } from '@swimlane/ngx-charts';
+import { DashAdminComponent } from './admin/dash-admin/dash-admin.component';
+import { MiPerfilAdminComponent } from './admin/perfil/mi-perfil-admin/mi-perfil-admin.component';
+import { UsuariosComponent } from './admin/usuarios/usuarios.component';
+import { ReportesComponent } from './admin/reportes/reportes.component';
 
 @NgModule({
   declarations: [
@@ -33,13 +39,18 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
     DashClienteComponent,
     InicioClientePageComponent,
     MiPerfilClienteComponent,
-    CentroCuentasComponent,
     EliminarCuentaClienteComponent,
     InfoComponent,
     SuccessAlertComponent,
     TransactionItemComponent,
     IngresosEgresosComponent,
     CrearUsuarioComponent,
+    RecargaItemComponent,
+    RetiroItemComponent,
+    DashAdminComponent,
+    MiPerfilAdminComponent,
+    UsuariosComponent,
+    ReportesComponent,
   ],
   imports: [
     BrowserModule,
@@ -49,6 +60,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
     FontAwesomeModule,
     FormsModule,
     BrowserAnimationsModule,
+    NgxChartsModule,
     ToastrModule.forRoot({
       timeOut: 3000, // Duración de los mensajes
       positionClass: 'toast-top-right', // Posición
