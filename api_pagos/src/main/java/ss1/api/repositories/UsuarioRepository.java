@@ -28,4 +28,14 @@ public interface UsuarioRepository extends CrudRepository<Usuario, Long> {
     @Query("SELECT p FROM Usuario p WHERE p.deleted = false")
     public List<Usuario> findAllActive();
 
+    public List<Usuario> findAllByDeletedAtIsNotNull();
+
+    public List<Usuario> findAllByDeletedAtIsNull();
+
+    public List<Usuario> findAllByRol_Nombre(String nombre);
+
+    public List<Usuario> findAllByRol_NombreAndDeletedAtIsNotNull(String rolNombre);
+
+    public List<Usuario> findAllByRol_NombreAndDeletedAtIsNull(String rolNombre);
+
 }

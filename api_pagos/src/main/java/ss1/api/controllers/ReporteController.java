@@ -14,32 +14,34 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import ss1.api.models.dto.RetiroDTO;
-import ss1.api.services.RetiroService;
+import ss1.api.models.TransaccionFallida;
+import ss1.api.models.Usuario;
+import ss1.api.services.ReporteService;
 
 /**
  *
  * @author Luis Monterroso
  */
 @RestController
-@RequestMapping("/api/retiro")
-public class RetiroController {
+@RequestMapping("/api/reporte")
+public class ReporteController {
 
     @Autowired
-    private RetiroService retiroService;
+    private ReporteService reporteService;
 
-    @GetMapping("/protected/getMis20RetirosMasRecientes")
-    public ResponseEntity<?> getMis20RetirosMasRecientes() {
-        List<RetiroDTO> data = retiroService.getMis20RetirosMasRecientes();
+    @GetMapping("/admin/reporteUsuarios")
+    public ResponseEntity<?> getUsuariosSegunSuEstado(
+            @RequestParam(required = false) String rol,
+            @RequestParam(required = false) String estadoUsuario) {
+        List<Usuario> data = reporteService.getUsuariosSegunSuEstado(rol, estadoUsuario);
         return ResponseEntity.status(HttpStatus.OK).body(data);
     }
 
-    @GetMapping("/protected/getMisRetirosEnDosFechas")
-    public ResponseEntity<?> getMisRetirosEnDosFechas(
+    @GetMapping("/admin/reporteTransaccionesFallidas")
+    public ResponseEntity<?> reporteTransaccionesFallidas(
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fecha1,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fecha2) {
-        List<RetiroDTO> data = retiroService.getMisRetirosEnDosFechas(fecha1, fecha2);
+        List<TransaccionFallida> data = reporteService.reporteTransaccionFallida(fecha1, fecha2);
         return ResponseEntity.status(HttpStatus.OK).body(data);
     }
-
 }

@@ -130,16 +130,6 @@ public class Usuario extends Auditor {
     @Schema(hidden = true)
     private List<Retiro> retirosEfectivo;
 
-    /**
-     * Las transacciones fallidas asociadas al usuario. La relación es uno a
-     * muchos, donde un usuario puede tener varios fallos.
-     */
-    @OneToMany(mappedBy = "usuario", orphanRemoval = true)
-    @Cascade(org.hibernate.annotations.CascadeType.ALL)
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    @Schema(hidden = true)
-    private List<TransaccionFallida> transaccionesFallidas;
-
     @OneToMany(mappedBy = "usuario", orphanRemoval = true)
     @Cascade(org.hibernate.annotations.CascadeType.ALL)
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
@@ -304,14 +294,6 @@ public class Usuario extends Auditor {
      */
     public void setRetirosEfectivo(List<Retiro> retirosEfectivo) {
         this.retirosEfectivo = retirosEfectivo;
-    }
-
-    public List<TransaccionFallida> getTransaccionesFallidas() {
-        return transaccionesFallidas;
-    }
-
-    public void setTransaccionesFallidas(List<TransaccionFallida> transaccionesFallidas) {
-        this.transaccionesFallidas = transaccionesFallidas;
     }
 
     public List<Transaccion> getTransaccionesEmitidas() {

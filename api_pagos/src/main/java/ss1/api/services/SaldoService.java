@@ -4,6 +4,7 @@
  */
 package ss1.api.services;
 
+import java.time.LocalDateTime;
 import javax.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -12,6 +13,7 @@ import ss1.api.excepciones.UnauthorizedException;
 import ss1.api.models.Recarga;
 import ss1.api.models.Retiro;
 import ss1.api.models.Saldo;
+import ss1.api.models.TransaccionFallida;
 import ss1.api.models.Usuario;
 import ss1.api.models.dto.SaldoDTO;
 import ss1.api.models.request.MovimientoExternoRequest;
@@ -35,6 +37,8 @@ public class SaldoService extends Service {
     @Autowired
     @Lazy
     private UsuarioService usuarioService;
+    @Autowired
+    private TransaccionFallidaService transaccionFallidaService;
     @Autowired
     private BancoServiceFactory bancoServiceFactory;
 
@@ -72,7 +76,6 @@ public class SaldoService extends Service {
      * @param transferencia La cantidad de dinero a transferir.
      */
     public void transferirFondos(Usuario remitente, Usuario destinatario, Double transferencia) {
-        //restamos al saldo del remitente la transferencia
         remitente.getSaldo().setSaldoDisponible(
                 remitente.getSaldo().getSaldoDisponible() - transferencia
         );
@@ -105,27 +108,58 @@ public class SaldoService extends Service {
     public String recargarSaldo(MovimientoExternoRequest recargaRequest) {
         //validar
         validarModelo(recargaRequest);
-        recargar(recargaRequest.getMonto(), recargaRequest.getBanco());
-        BancoService bancoService = bancoServiceFactory.getBancoService(recargaRequest.getBanco());
-        String token = bancoService.login(recargaRequest.getEmail(),
-                recargaRequest.getPin());
-        bancoService.recargarDesdeBanco(token, recargaRequest.getMonto());
-        return "Se recargo el monto con exito.";
+        try {
+            recargar(recargaRequest.getMonto(), recargaRequest.getBanco());
+            BancoService bancoService = bancoServiceFactory.getBancoService(recargaRequest.getBanco());
+            String token = bancoService.login(recargaRequest.getEmail(),
+                    recargaRequest.getPin());
+            bancoService.recargarDesdeBanco(token, recargaRequest.getMonto());
+            return "Se recargo el monto con exito.";
+        } catch (Exception ex) {
+            TransaccionFallida transaccionFallida = new TransaccionFallida(
+                    "N/A",
+                    LocalDateTime.now(),
+                    ex.getMessage(),
+                    recargaRequest.getMonto(),
+                    "Recarga desde banco",
+                    recargaRequest.getBanco(),
+                    recargaRequest.getEmail()
+            );
+            this.transaccionFallidaService.guardarTransaccionFallida(transaccionFallida);
+            throw ex;
+        }
+
     }
 
     @Transactional(rollbackOn = Exception.class)
     public String retirarSaldo(MovimientoExternoRequest recargaRequest) {
         //validar
         validarModelo(recargaRequest);
-        //retiramos el saldo
-        retirar(recargaRequest.getMonto(), recargaRequest.getBanco(),
-                recargaRequest.getEmail());
-        //si no hay ningun problema entonces mandamos el dinero al banco
-        BancoService bancoService = bancoServiceFactory.getBancoService(recargaRequest.getBanco());
-        String token = bancoService.login(recargaRequest.getEmail(),
-                recargaRequest.getPin());
-        bancoService.retirarABanco(token, recargaRequest.getMonto());
-        return "Se retiro el monto con exito.";
+        try {
+            //retiramos el saldo
+            String retirar = retirar(recargaRequest.getMonto(), recargaRequest.getBanco(),
+                    recargaRequest.getEmail());
+            //si no hay ningun problema entonces mandamos el dinero al banco
+            BancoService bancoService = bancoServiceFactory.getBancoService(recargaRequest.getBanco());
+            String token = bancoService.login(recargaRequest.getEmail(),
+                    recargaRequest.getPin());
+            bancoService.retirarABanco(token, recargaRequest.getMonto());
+            return "Se retiro el monto con exito.";
+        } catch (Exception ex) {
+
+            TransaccionFallida transaccionFallida = new TransaccionFallida(
+                    "N/A",
+                    LocalDateTime.now(),
+                    ex.getMessage(),
+                    recargaRequest.getMonto(),
+                    "Retiro a banco",
+                    recargaRequest.getBanco(),
+                    recargaRequest.getEmail()
+            );
+            this.transaccionFallidaService.guardarTransaccionFallida(transaccionFallida);
+
+            throw ex;
+        }
     }
 
     @Transactional(rollbackOn = Exception.class)
@@ -153,6 +187,7 @@ public class SaldoService extends Service {
         //verificar si el usuario tiene suficiente dinero
         boolean tieneSuficienteSaldo
                 = usuarioTieneSaldoSuficiente(usuario, montoRetiro);
+
         if (!tieneSuficienteSaldo) {
             throw new UnauthorizedException("Saldo insuficiente.");
         }

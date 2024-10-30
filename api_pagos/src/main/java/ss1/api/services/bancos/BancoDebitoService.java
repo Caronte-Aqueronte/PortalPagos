@@ -82,7 +82,8 @@ public class BancoDebitoService implements BancoService {
 
             if (responseBody != null && responseBody.get("message") != null) {
 
-                throw new UnauthorizedException((String) responseBody.get("message"));
+                throw new UnauthorizedException(
+                        "Mensaje desde el banco: " + (String) responseBody.get("message"));
             }
 
             throw new UnauthorizedException("Transacción fallida en el banco de debito.");
