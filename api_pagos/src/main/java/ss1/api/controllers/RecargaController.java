@@ -16,33 +16,30 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ss1.api.models.dto.RecargaDTO;
-import ss1.api.models.dto.RetiroDTO;
 import ss1.api.services.RecargaService;
-import ss1.api.services.RetiroService;
 
 /**
  *
  * @author Luis Monterroso
  */
 @RestController
-@RequestMapping("/api/retiro")
-public class RetiroController {
+@RequestMapping("/api/recarga")
+public class RecargaController {
 
     @Autowired
-    private RetiroService retiroService;
+    private RecargaService recargaService;
 
-    @GetMapping("/protected/getMis20RetirosMasRecientes")
-    public ResponseEntity<?> getMis20RetirosMasRecientes() {
-        List<RetiroDTO> data = retiroService.getMis20RetirosMasRecientes();
+    @GetMapping("/protected/getMisUltimos20Recargas")
+    public ResponseEntity<?> getMisUltimos20Recargas() {
+        List<RecargaDTO> data = recargaService.getMisUltimos20Recargas();
         return ResponseEntity.status(HttpStatus.OK).body(data);
     }
 
-    @GetMapping("/protected/getMisRetirosEnDosFechas")
-    public ResponseEntity<?> getMisRetirosEnDosFechas(
+    @GetMapping("/protected/getMisRecargasEnDosFechas")
+    public ResponseEntity<?> getMisRecargasEnDosFechas(
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fecha1,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fecha2) {
-        List<RetiroDTO> data = retiroService.getMisRetirosEnDosFechas(fecha1, fecha2);
+        List<RecargaDTO> data = recargaService.getMisRecargasEnDosFechas(fecha1, fecha2);
         return ResponseEntity.status(HttpStatus.OK).body(data);
     }
-
 }

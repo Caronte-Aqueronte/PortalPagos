@@ -6,6 +6,7 @@ package ss1.api.services.bancos;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import ss1.api.excepciones.NotFoundException;
 
 /**
  *
@@ -17,13 +18,16 @@ public class BancoServiceFactory {
     @Autowired
     private BancoCreditoService bancoCreditoService;
 
-    public BancoService getBancoService(String tipoBanco) {
+    @Autowired
+    private BancoDebitoService bancoDebitoService;
+
+    public BancoService getBancoService(String tipoBanco) throws NotFoundException {
         if ("credito".equalsIgnoreCase(tipoBanco)) {
             return bancoCreditoService;
         } else if ("debito".equalsIgnoreCase(tipoBanco)) {
-            return null;
+            return bancoDebitoService;
         }
-        throw new IllegalArgumentException("Tipo de banco no soportado: " + tipoBanco);
+        throw new NotFoundException("Tipo de banco no soportado: " + tipoBanco);
     }
 
 }

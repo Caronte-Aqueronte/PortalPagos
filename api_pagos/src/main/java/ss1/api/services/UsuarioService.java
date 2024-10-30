@@ -5,6 +5,8 @@
 package ss1.api.services;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Objects;
 import javax.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -55,6 +57,30 @@ public class UsuarioService extends ss1.api.services.Service {
     private RolRepository rolRepository;
     @Autowired
     private SaldoService saldoService;
+
+    public List<Usuario> getUsuariosExceptoElMio() throws NotFoundException {
+        Usuario usuario = this.getUsuarioUseJwt();
+        return usuarioRepository.findAllExceptUser(usuario.getId());
+    }
+
+    public String eliminarUsuarioParaAdmins(Long usuarioId) throws BadRequestException,
+            ConflictException, NotFoundException, UnauthorizedException {
+        //obtener el usuario por el JWT
+        Usuario usuario = getUsuarioUseJwt();
+
+        boolean userAdmin = isUserAdmin(usuario.getEmail());
+
+        if (!userAdmin) {
+            throw new UnauthorizedException("No eres administrador.");
+        }
+
+        if (Objects.equals(usuario.getId(), usuarioId)) {
+            throw new UnauthorizedException("No puedes eliminar tu usuairo desde aqui.");
+
+        }
+        //mnadamos a eliminar
+        return this.eliminarUsuarioAbstraccion(new Usuario(usuarioId));
+    }
 
     /**
      * Inicia la sesión de un usuario autenticándolo con su email y contraseña.
@@ -185,7 +211,8 @@ public class UsuarioService extends ss1.api.services.Service {
         Usuario usuario = getUsuarioUseJwt();
 
         //ahora con el encriptador verificamos que la password sea la misma
-        boolean comparacion = encriptador.compararPassword(usuarioEliminar.getPassword(),
+        boolean comparacion = encriptador.compararPassword(
+                usuarioEliminar.getPassword(),
                 usuario.getPassword());
 
         if (!comparacion) {
@@ -287,7 +314,8 @@ public class UsuarioService extends ss1.api.services.Service {
         Usuario usuario = this.getUsuarioById(usuarioEliminar);
 
         //verificar que no tenga fondos el usuario
-        if (this.saldoService.usuarioTieneSaldo(usuario) == true) {
+        if (!isUserAdmin(usuario.getEmail())
+                && this.saldoService.usuarioTieneSaldo(usuario) == true) {
             throw new ConflictException("El usuario tiene saldo disponible en su cuenta, no se puede eliminar.");
         }
         //eliminar el usuario

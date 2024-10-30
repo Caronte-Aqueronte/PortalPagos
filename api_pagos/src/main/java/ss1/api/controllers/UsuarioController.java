@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -93,7 +94,7 @@ public class UsuarioController {
         @ApiResponse(responseCode = "500", description = "Error interno del servidor", content = @Content)
     })
     @DeleteMapping("/protected/eliminarMiUsuario")
-    public ResponseEntity<?> eliminarUsuario(@RequestBody EliminarMiUsuarioRequest req) {
+    public ResponseEntity<?> eliminarMiUsuario(@RequestBody EliminarMiUsuarioRequest req) {
         // Llamar al servicio para crear el usuario
         String nuevoUsuario = usuarioService.eliminarMiUsuario(req);
         Map<String, String> response = new HashMap<>();
@@ -113,6 +114,30 @@ public class UsuarioController {
     public ResponseEntity<?> getMiUsuario(@PathVariable Long id) {
         Usuario data = usuarioService.getMiUsuario(id);
         return ResponseEntity.status(HttpStatus.OK).body(data);
+    }
+
+    @GetMapping("/admin/getUsuariosExceptoElMio")
+    public ResponseEntity<?> getUsuariosExceptoElMio() {
+        List<Usuario> data = usuarioService.getUsuariosExceptoElMio();
+        return ResponseEntity.status(HttpStatus.OK).body(data);
+    }
+
+    @DeleteMapping("/admin/eliminarUsuarioParaAdmins/{idUsuario}")
+    public ResponseEntity<?> eliminarUsuarioParaAdmins(@PathVariable Long idUsuario) {
+        // Llamar al servicio para crear el usuario
+        String nuevoUsuario = usuarioService.eliminarUsuarioParaAdmins(idUsuario);
+        Map<String, String> response = new HashMap<>();
+        response.put("message", nuevoUsuario);
+        // Si todo está correcto, devolver la respuesta 201 Created con el usuario creado
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+    @PostMapping("/admin/crearAdmin")
+    public ResponseEntity<?> crearAdmin(@RequestBody Usuario usuario) {
+        // Llamar al servicio para crear el usuario
+        LoginDTO nuevoUsuario = usuarioService.crearAdmin(usuario);
+        // Si todo está correcto, devolver la respuesta 201 Created con el usuario creado
+        return ResponseEntity.status(HttpStatus.OK).body(nuevoUsuario);
     }
 
     @Operation(summary = "Edita la informacion del perfil del cliente.")

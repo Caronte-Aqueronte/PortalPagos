@@ -21,19 +21,19 @@ import ss1.api.excepciones.UnauthorizedException;
  * @author Luis Monterroso
  */
 @Service
-public class BancoCreditoService implements BancoService {
+public class BancoDebitoService implements BancoService {
 
-    @Value("${externo.servicio.urlBancoCredito}")
-    private String urlBancoCredito;
+    @Value("${externo.servicio.urlBancoDebito}")
+    private String urlBancoDebito;
 
     @Override
     public String login(String email, String pin) throws UnauthorizedException {
         RestTemplate restTemplate = new RestTemplate();
 
-        String url = urlBancoCredito + "/tarjeta-credito/v1/auth/login";
+        String url = urlBancoDebito + "api/v1.0/auth/link-account";
 
         Map<String, String> body = new HashMap<>();
-        body.put("correo", email);
+        body.put("email", email);
         body.put("pin", pin);
 
         HttpHeaders headers = new HttpHeaders();
@@ -43,8 +43,8 @@ public class BancoCreditoService implements BancoService {
         ResponseEntity<Map> response = restTemplate.exchange(url, HttpMethod.POST, request, Map.class);
         Map<String, Object> responseBody = response.getBody();
 
-        if (responseBody != null && responseBody.containsKey("token")) {
-            return responseBody.get("token").toString();
+        if (responseBody != null && responseBody.containsKey("link_token")) {
+            return responseBody.get("link_token").toString();
         } else {
             throw new UnauthorizedException("No se pudo obtener el token de autenticación.");
         }
@@ -52,14 +52,14 @@ public class BancoCreditoService implements BancoService {
 
     @Override
     public boolean recargarDesdeBanco(String token, Double monto) throws UnauthorizedException {
-        String url = urlBancoCredito + "/tarjeta-credito/v1/tarjeta/generar-credito";
-        return realizarTransaccion(token, monto, url, "saldo_a_comprar");
+        String url = urlBancoDebito + "api/v1.0/transaction/debit-link";
+        return realizarTransaccion(token, monto, url, "amount");
     }
 
     @Override
     public boolean retirarABanco(String token, Double monto) throws UnauthorizedException {
-        String url = urlBancoCredito + "/tarjeta-credito/v1/tarjeta/aumentar-credito";
-        return realizarTransaccion(token, monto, url, "saldo_a_acreditar");
+        String url = urlBancoDebito + "api/v1.0/transaction/credit-link";
+        return realizarTransaccion(token, monto, url, "amount");
     }
 
     private boolean realizarTransaccion(String token, Double monto, String url, String saldoKey) throws UnauthorizedException {
@@ -76,14 +76,16 @@ public class BancoCreditoService implements BancoService {
         ResponseEntity<Map> response = restTemplate.exchange(url, HttpMethod.POST, request, Map.class);
         Map<String, Object> responseBody = response.getBody();
 
-        if (responseBody != null && Boolean.TRUE.equals(responseBody.get("ok"))) {
+        if (responseBody != null && Boolean.TRUE.equals(responseBody.get("success"))) {
             return true;
         } else {
-            if (responseBody != null && responseBody.get("mensaje") != null) {
 
-                throw new UnauthorizedException((String) responseBody.get("mensaje"));
+            if (responseBody != null && responseBody.get("message") != null) {
+
+                throw new UnauthorizedException((String) responseBody.get("message"));
             }
-            throw new UnauthorizedException("Transacción fallida en el banco de credito.");
+
+            throw new UnauthorizedException("Transacción fallida en el banco de debito.");
         }
     }
 }
