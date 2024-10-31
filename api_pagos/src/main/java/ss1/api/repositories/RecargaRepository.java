@@ -31,4 +31,12 @@ public interface RecargaRepository extends CrudRepository<Recarga, Long> {
             @Param("fechaInicio") Date fechaInicio,
             @Param("fechaFin") Date fechaFin);
 
+    @Query("SELECT r FROM Recarga r WHERE "
+            + "(:fechaInicio IS NULL OR DATE(r.createdAt) >= :fechaInicio) "
+            + "AND (:fechaFin IS NULL OR DATE(r.createdAt)  <= :fechaFin) "
+            + "ORDER BY r.createdAt DESC")
+    public List<Recarga> findByFechaBetween(
+            @Param("fechaInicio") Date fechaInicio,
+            @Param("fechaFin") Date fechaFin);
+
 }

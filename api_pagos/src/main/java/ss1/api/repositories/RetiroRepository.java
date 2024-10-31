@@ -31,4 +31,13 @@ public interface RetiroRepository extends CrudRepository<Retiro, Long> {
             @Param("fechaInicio") Date fechaInicio,
             @Param("fechaFin") Date fechaFin);
 
+    @Query("SELECT r FROM Retiro r WHERE "
+            + "(:fechaInicio IS NULL OR DATE(r.createdAt) >= :fechaInicio) "
+            + "AND (:fechaFin IS NULL OR DATE(r.createdAt) <= :fechaFin) "
+            + "ORDER BY r.createdAt DESC")
+    public List<Retiro> findRetirosByDateRange(
+            @Param("fechaInicio") Date fechaInicio,
+            @Param("fechaFin") Date fechaFin
+    );
+
 }
