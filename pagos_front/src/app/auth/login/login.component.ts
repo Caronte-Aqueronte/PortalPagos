@@ -50,7 +50,7 @@ export class LoginComponent implements OnInit {
 
           // Redirigir al dashboard correspondiente según el rol del usuario
           if (userRole === 'ADMIN') {
-            // this.router.navigate(['/admin-dashboard']);
+             this.router.navigate(['/admin-dashboard']);
           } else if (userRole === 'CLIENTE') {
             this.router.navigate(['/dashboard-cliente/inicio']);
           } else {

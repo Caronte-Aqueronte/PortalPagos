@@ -23,12 +23,12 @@ import ss1.api.services.UsuarioService;
  */
 @Component
 public class SeedersConfig implements ApplicationListener<ContextRefreshedEvent> {
-    
+
     @Autowired
     private RolRepository rolRepository;
     @Autowired
     private UsuarioService usuarioService;
-    
+
     public Rol insertarRol(Rol rol) throws Exception {
         Optional<Rol> opRol = this.rolRepository.findOneByNombre(rol.getNombre());
         if (opRol.isPresent()) {
@@ -36,7 +36,7 @@ public class SeedersConfig implements ApplicationListener<ContextRefreshedEvent>
         }
         return this.rolRepository.save(rol);
     }
-    
+
     @Override
     public void onApplicationEvent(ContextRefreshedEvent event) {
         try {
@@ -46,17 +46,22 @@ public class SeedersConfig implements ApplicationListener<ContextRefreshedEvent>
             Rol adminRol = this.insertarRol(new Rol("ADMIN"));
 
             // Seeder de usuarios del sistema
-            Usuario admin = new Usuario("00000000", "admin@admin", "admin", "admin", "123", adminRol);
-            Usuario cliente1 = new Usuario("14169649", "empleado77@empresa1.com", "Luis", "Monterroso", "123", clienteRol);
-            Usuario cliente2 = new Usuario("38800926", "empleada90@empresa2.com", "Maria", "Yox", "123", clienteRol);
-            
-            cliente1.setSaldo(new Saldo(10000.0));
-            cliente2.setSaldo(new Saldo(10000.0));
+            Usuario admin = new Usuario("admin@admin", "admin", "admin", "123", adminRol);
+            Usuario cliente1 = new Usuario("empleado77@empresa1.com", "Luis", "Monterroso", "123", clienteRol);
+            Usuario cliente2 = new Usuario("empleada90@empresa2.com", "Maria", "Yox", "123", clienteRol);
+            Usuario cliente3 = new Usuario("electricShop@gmail.com",
+                    "Elvis", "Elvis", "123", clienteRol);
+            Usuario cliente4 = new Usuario("mensstyle@gmail.com",
+                    "Alex", "Alex", "123", clienteRol);
+
             try {
-                this.usuarioService.crearUsuario(admin);
+                this.usuarioService.crearAdmin(admin);
                 this.usuarioService.crearUsuario(cliente1);
                 this.usuarioService.crearUsuario(cliente2);
+                this.usuarioService.crearUsuario(cliente3);
+                this.usuarioService.crearUsuario(cliente4);
             } catch (Exception e) {
+                e.printStackTrace();
             }
         } catch (Exception ex) {
             Logger.getLogger(SeedersConfig.class.getName()).log(Level.SEVERE, null, ex);

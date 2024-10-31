@@ -50,7 +50,7 @@ public class Auditor {
     @Schema(hidden = true)
     private LocalDateTime deletedAt;
 
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+ 
     @Schema(hidden = true)
     private Boolean deleted;
 

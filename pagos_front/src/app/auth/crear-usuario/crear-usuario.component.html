@@ -1,0 +1,115 @@
+<div class="min-h-screen flex items-center justify-center bg-gray-200 p-6 relative overflow-hidden">
+    <!-- Fondo con el logo -->
+    <div class="absolute inset-0 flex items-center justify-center opacity-70">
+        <img src="img/logo_no_fondo.png" alt="Logo" class="w-full h-full object-cover object-center">
+    </div>
+
+    <!-- Contenedor con efecto glass -->
+    <div
+        class="relative max-w-md w-full bg-white bg-opacity-10 backdrop-blur-lg border border-white border-opacity-50 rounded-lg shadow-2xl p-8">
+
+        <!-- Logo visible en pantallas pequeñas -->
+        <div class="flex justify-center mb-6 lg:hidden">
+            <img src="img/logo_no_fondo.png" alt="Logo" class="h-16 w-auto opacity-90">
+        </div>
+
+        <!-- Título del formulario -->
+        <h2 class="text-3xl font-semibold text-center text-gray-500 mb-6">Crear Usuario</h2>
+
+        <form [formGroup]="registerForm" (ngSubmit)="createUser()">
+            <!-- Campo Email -->
+            <div class="mb-4">
+                <label for="email" class="block text-sm font-medium text-gray-500">Correo Electrónico</label>
+                <input type="email" id="email" formControlName="email" required
+                    class="appearance-none block w-full px-4 py-3 border border-gray-400 rounded-md bg-transparent placeholder-gray-400 text-gray-600 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                <div *ngIf="registerForm.get('email')?.invalid && registerForm.get('email')?.touched"
+                    class="text-red-400 text-xs mt-1">
+                    <p *ngIf="registerForm.get('email')?.errors?.['required']">El email del cliente no puede estar
+                        vacío.</p>
+                    <p *ngIf="registerForm.get('email')?.errors?.['email']">El email debe ser un correo electrónico
+                        válido.</p>
+                    <p *ngIf="registerForm.get('email')?.errors?.['maxlength']">El email debe tener entre 1 y 250
+                        caracteres.</p>
+                </div>
+            </div>
+
+            <!-- Campo Nombres -->
+            <div class="mb-4">
+                <label for="nombres" class="block text-sm font-medium text-gray-500">Nombres</label>
+                <input type="text" id="nombres" formControlName="nombres" required
+                    class="appearance-none block w-full px-4 py-3 border border-gray-400 rounded-md bg-transparent placeholder-gray-400 text-gray-600 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                <div *ngIf="registerForm.get('nombres')?.invalid && registerForm.get('nombres')?.touched"
+                    class="text-red-400 text-xs mt-1">
+                    <p *ngIf="registerForm.get('nombres')?.errors?.['required']">Los nombres del cliente no pueden estar
+                        vacíos.</p>
+                    <p *ngIf="registerForm.get('nombres')?.errors?.['maxlength']">Los nombres deben tener entre 1 y 250
+                        caracteres.</p>
+                </div>
+            </div>
+
+            <!-- Campo Apellidos -->
+            <div class="mb-4">
+                <label for="apellidos" class="block text-sm font-medium text-gray-500">Apellidos</label>
+                <input type="text" id="apellidos" formControlName="apellidos" required
+                    class="appearance-none block w-full px-4 py-3 border border-gray-400 rounded-md bg-transparent placeholder-gray-400 text-gray-600 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                <div *ngIf="registerForm.get('apellidos')?.invalid && registerForm.get('apellidos')?.touched"
+                    class="text-red-400 text-xs mt-1">
+                    <p *ngIf="registerForm.get('apellidos')?.errors?.['required']">Los apellidos no pueden estar vacíos.
+                    </p>
+                    <p *ngIf="registerForm.get('apellidos')?.errors?.['maxlength']">Los apellidos deben tener entre 1 y
+                        250 caracteres.</p>
+                </div>
+            </div>
+
+            <!-- Campo Contraseña -->
+            <div class="mb-4">
+                <label for="password" class="block text-sm font-medium text-gray-500">Contraseña</label>
+                <input type="password" id="password" formControlName="password" required
+                    class="appearance-none block w-full px-4 py-3 border border-gray-400 rounded-md bg-transparent placeholder-gray-400 text-gray-600 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                <div *ngIf="registerForm.get('password')?.invalid && registerForm.get('password')?.touched"
+                    class="text-red-400 text-xs mt-1">
+                    <p *ngIf="registerForm.get('password')?.errors?.['required']">La contraseña no puede estar vacía.
+                    </p>
+                    <p *ngIf="registerForm.get('password')?.errors?.['maxlength']">La contraseña debe tener entre 1 y
+                        250 caracteres.</p>
+                </div>
+            </div>
+
+            <!-- Confirmar Contraseña -->
+            <div class="mb-6">
+                <label for="confirmPassword" class="block text-sm font-medium text-gray-500">Confirmar
+                    Contraseña</label>
+                <input type="password" id="confirmPassword" formControlName="confirmPassword" required
+                    class="appearance-none block w-full px-4 py-3 border border-gray-400 rounded-md bg-transparent placeholder-gray-400 text-gray-600 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                <div *ngIf="!passwordsMatch() && registerForm.get('confirmPassword')?.touched"
+                    class="text-red-400 text-xs mt-1">
+                    <p>Las contraseñas no coinciden.</p>
+                </div>
+            </div>
+
+            <!-- Botón Crear Cuenta -->
+            <div class="flex justify-center mt-6">
+                <button type="submit"
+                    class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-gray-400 disabled:cursor-not-allowed disabled:opacity-50"
+                    [disabled]="registerForm.invalid || !passwordsMatch()">
+                    <span class="absolute left-0 inset-y-0 flex items-center pl-3">
+                        <fa-icon [icon]="['fas', 'user-plus']"
+                            class="h-5 w-5 text-white group-hover:text-gray-200"></fa-icon>
+                    </span>
+                    Crear Cuenta
+                </button>
+            </div>
+        </form>
+
+        <!-- Enlace a Iniciar Sesión -->
+        <div class="text-center mt-4">
+            <p class="text-gray-700">¿Ya tienes una cuenta? <a routerLink="/login"
+                    class="text-indigo-600 hover:underline">Inicia sesión</a></p>
+        </div>
+
+
+
+    </div>
+    <!-- Componente de alerta -->
+    <app-error-alert [message]="errorMessage" (close)="closeAlert()"></app-error-alert>
+</div>

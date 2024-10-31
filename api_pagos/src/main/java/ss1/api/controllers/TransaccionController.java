@@ -14,7 +14,9 @@ import java.util.List;
 import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -66,11 +68,46 @@ public class TransaccionController {
         return ResponseEntity.ok(resultado); // Retornar la respuesta según el resultado
     }
 
+    /**
+     * Procesa una solicitud de pago y genera un comprobante en formato PDF.
+     * Este método toma los datos de la transacción del cuerpo de la solicitud,
+     * procesa el pago y devuelve el comprobante en formato PDF.
+     *
+     * @param solicitudPago Objeto {@link PagoExternoRequest} que contiene los
+     * detalles de la transacción a procesar.
+     * @return Un {@link ResponseEntity} con el PDF del comprobante como un
+     * array de bytes.
+     * @throws Exception Si ocurre un error durante el procesamiento del pago o
+     * la generación del comprobante.
+     */
+    @Operation(summary = "Genera un comprobante en PDF para una solicitud de pago",
+            description = "Procesa la transacción y devuelve un comprobante en formato PDF.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Comprobante generado exitosamente",
+                content = @Content(mediaType = "application/pdf")),
+        @ApiResponse(responseCode = "400", description = "Solicitud incorrecta -"
+                + " Datos inválidos en la solicitud de pago",
+                content = @Content(mediaType = "application/json", schema = @Schema(implementation = String.class))),
+        @ApiResponse(responseCode = "404", description = "Recurso no encontrado -"
+                + " Tienda no reconocida o comprobante no disponible",
+                content = @Content(mediaType = "application/json", schema = @Schema(implementation = String.class))),
+        @ApiResponse(responseCode = "409", description = "Conflicto - Error durante"
+                + " el procesamiento del pago por ejemplo un fondo insuficiente.",
+                content = @Content(mediaType = "application/json", schema = @Schema(implementation = String.class))),
+        @ApiResponse(responseCode = "500", description = "Error interno del servidor",
+                content = @Content(mediaType = "application/json", schema = @Schema(implementation = String.class)))
+    })
     @PostMapping("/protected/pagarGetComprobante")
-    public ResponseEntity<?> pagarGetComprobante(@RequestBody PagoExternoRequest solicitudPago) {
+    public ResponseEntity<?> pagarGetComprobante(@RequestBody PagoExternoRequest solicitudPago)
+            throws Exception {
         // Llamar al servicio de pagos para procesar la transacción
         byte[] resultado = transaccionService.pagarGetComprobante(solicitudPago);
-        return ResponseEntity.ok(resultado); // Retornar la respuesta según el resultado
+
+        // Configuramos los headers de la respuesta
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_PDF);
+        headers.setContentDispositionFormData("inline", "Factura.pdf");
+        return new ResponseEntity<>(resultado, headers, HttpStatus.OK);
     }
 
     /**

@@ -10,6 +10,7 @@ import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import ss1.api.tools.ManejadorTiempo;
 
 /**
  * La clase TransaccionFallida registra las transacciones fallidas que no han
@@ -30,11 +31,7 @@ import javax.validation.constraints.Size;
 @Table(name = "transaccion_fallida")
 public class TransaccionFallida extends Auditor {
 
-    // Validación para asegurar que el usuario no sea nulo
-    @NotNull(message = "El usuario no puede ser nulo.")
-    @ManyToOne // Relación con Usuario (muchos a uno)
-    @JoinColumn(name = "usuario_id", nullable = false)
-    private Usuario usuario;
+    private String emisor;
 
     // Validación para asegurar que la fecha y hora no sea nula
     @NotNull(message = "La fecha y hora no pueden ser nulas.")
@@ -72,6 +69,8 @@ public class TransaccionFallida extends Auditor {
     @Size(max = 20, message = "El número de cuenta destino no debe exceder los 20 caracteres.")
     private String cuentaDestino;
 
+    private String fechaString;
+
     // Constructor vacío requerido por JPA
     public TransaccionFallida() {
     }
@@ -80,7 +79,7 @@ public class TransaccionFallida extends Auditor {
      * Constructor con parámetros para inicializar los campos de la transacción
      * fallida.
      *
-     * @param usuario Nombre o identificación del usuario.
+     * @param emisor Nombre o identificación del usuario.
      * @param fechaHora Fecha y hora del error en la transacción.
      * @param motivoError Descripción del error ocurrido.
      * @param montoIntentado Monto que el usuario intentó movilizar.
@@ -88,34 +87,25 @@ public class TransaccionFallida extends Auditor {
      * @param entidadFinanciera Entidad financiera relacionada.
      * @param cuentaDestino Cuenta destino involucrada (opcional).
      */
-    public TransaccionFallida(Usuario usuario, LocalDateTime fechaHora, String motivoError, Double montoIntentado,
+    public TransaccionFallida(String emisor, LocalDateTime fechaHora, String motivoError, Double montoIntentado,
             String tipoTransaccion, String entidadFinanciera, String cuentaDestino) {
-        this.usuario = usuario;
+        this.emisor = emisor;
         this.fechaHora = fechaHora;
         this.motivoError = motivoError;
         this.montoIntentado = montoIntentado;
         this.tipoTransaccion = tipoTransaccion;
         this.entidadFinanciera = entidadFinanciera;
         this.cuentaDestino = cuentaDestino;
+        ManejadorTiempo manejadorTiempo = new ManejadorTiempo();
+        this.fechaString = manejadorTiempo.parsearFechaYHoraAFormatoRegional(fechaHora.toLocalDate());
     }
 
-    // Métodos Getters y Setters
-    /**
-     * Obtiene el usuario relacionado con la transacción fallida.
-     *
-     * @return El objeto Usuario relacionado.
-     */
-    public Usuario getUsuario() {
-        return usuario;
+    public String getEmisor() {
+        return emisor;
     }
 
-    /**
-     * Asigna el usuario relacionado con la transacción fallida.
-     *
-     * @param usuario El objeto Usuario a asignar.
-     */
-    public void setUsuario(Usuario usuario) {
-        this.usuario = usuario;
+    public void setEmisor(String emisor) {
+        this.emisor = emisor;
     }
 
     /**
@@ -231,4 +221,13 @@ public class TransaccionFallida extends Auditor {
     public void setCuentaDestino(String cuentaDestino) {
         this.cuentaDestino = cuentaDestino;
     }
+
+    public String getFechaString() {
+        return fechaString;
+    }
+
+    public void setFechaString(String fechaString) {
+        this.fechaString = fechaString;
+    }
+
 }
