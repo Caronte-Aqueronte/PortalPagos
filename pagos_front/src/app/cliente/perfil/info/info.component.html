@@ -14,7 +14,7 @@
                 <div>
                     <label for="nombres" class="block text-sm font-medium text-gray-700">Nombres</label>
                     <input id="nombres" formControlName="nombres" type="text"
-                        class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
+                        class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
                     <div *ngIf="profileForm.get('nombres')?.invalid && profileForm.get('nombres')?.touched"
                         class="text-red-600 text-sm">
                         Los nombres son obligatorios.
@@ -25,7 +25,7 @@
                 <div>
                     <label for="apellidos" class="block text-sm font-medium text-gray-700">Apellidos</label>
                     <input id="apellidos" formControlName="apellidos" type="text"
-                        class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
+                        class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
                     <div *ngIf="profileForm.get('apellidos')?.invalid && profileForm.get('apellidos')?.touched"
                         class="text-red-600 text-sm">
                         Los apellidos son obligatorios.
@@ -36,7 +36,7 @@
                 <div>
                     <label for="email" class="block text-sm font-medium text-gray-700">Correo Electrónico</label>
                     <input id="email" formControlName="email" type="email"
-                        class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                        class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                         readonly />
                 </div>
             </div>
@@ -68,7 +68,7 @@
                 <div>
                     <label for="oldPassword" class="block text-sm font-medium text-gray-700">Contraseña actual</label>
                     <input id="oldPassword" formControlName="oldPassword" type="password"
-                        class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
+                        class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
                     <div *ngIf="passwordForm.get('oldPassword')?.invalid && passwordForm.get('oldPassword')?.touched"
                         class="text-red-600 text-sm">
                         La contraseña actual es obligatoria.
@@ -79,7 +79,7 @@
                 <div>
                     <label for="newPassword" class="block text-sm font-medium text-gray-700">Nueva contraseña</label>
                     <input id="newPassword" formControlName="newPassword" type="password"
-                        class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
+                        class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
                     <div *ngIf="passwordForm.get('newPassword')?.invalid && passwordForm.get('newPassword')?.touched"
                         class="text-red-600 text-sm">
                         La nueva contraseña debe tener al menos 6 caracteres.

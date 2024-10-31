@@ -22,7 +22,7 @@
                 <div class="lg:col-span-2">
                     <label for="password" class="block text-sm font-medium text-gray-700">Contraseña</label>
                     <input id="password" formControlName="password" type="password"
-                        class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-red-500 focus:border-red-500 sm:text-sm" />
+                        class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
                     <div *ngIf="deleteAccountForm.get('password')?.invalid && deleteAccountForm.get('password')?.touched"
                         class="text-red-600 text-sm">
                         La contraseña es obligatoria para confirmar la eliminación.
