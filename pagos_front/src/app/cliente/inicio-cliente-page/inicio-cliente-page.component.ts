@@ -205,6 +205,8 @@ export class InicioClientePageComponent implements OnInit {
       }
 
       this.closeDialog();
+
+      //borrar form 
     } else {
       this.toastr.error(
         'Por favor completa el formulario correctamente.',
@@ -222,6 +224,7 @@ export class InicioClientePageComponent implements OnInit {
           'Éxito'
         );
         this.getRecargasDelUsuario();
+        this.getSaldoDelUsuario();
       },
       error: (err) => {
         // Manejo del error, muestra el mensaje adecuado
@@ -241,6 +244,7 @@ export class InicioClientePageComponent implements OnInit {
           'Éxito'
         );
         this.getRetirosDelUsuario();
+        this.getSaldoDelUsuario();
       },
       error: (err) => {
         // Manejo del error, muestra el mensaje adecuado

@@ -1,7 +1,7 @@
 <div class="p-6">
     <!-- Título y botón de agregar administrador -->
     <div class="flex flex-col md:flex-row items-center justify-between mb-6">
-        <h2 class="text-2xl font-bold text-gray-800">Empleados</h2>
+        <h2 class="text-2xl font-bold text-gray-800">Usuarios</h2>
         <button (click)="openAdminPopup()"
             class="mt-4 md:mt-0 bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
             <fa-icon [icon]="['fas', 'user-plus']" class="mr-2"></fa-icon>
@@ -25,15 +25,19 @@
                     <td class="py-3 px-6 text-left whitespace-nowrap">
                         <div class="flex items-center">
                             <fa-icon [icon]="['fas', 'user']" class="h-5 w-5 text-gray-400 mr-2"></fa-icon>
-                            <span>{{ empleado.nombres }}</span>
+                            <span>{{ empleado.nombres + " " + empleado.apellidos }}</span>
                         </div>
                     </td>
                     <td class="py-3 px-6 text-left">
                         <span>{{ empleado.email }}</span>
                     </td>
                     <td class="py-3 px-6 text-center">
-                        <span class="bg-green-200 text-green-800 py-1 px-3 rounded-full text-xs">{{ empleado.rol.nombre
-                            }}</span>
+                        <span class="py-1 px-3 rounded-full text-xs" [ngClass]="{
+                              'bg-yellow-200 text-yellow-800': empleado.rol.nombre === 'ADMIN',
+                              'bg-green-200 text-green-800': empleado.rol.nombre !== 'ADMIN'
+                            }">
+                            {{ empleado.rol.nombre }}
+                        </span>
                     </td>
                     <td class="py-3 px-6 text-center">
                         <button (click)="eliminarEmpleado(empleado.id)"
