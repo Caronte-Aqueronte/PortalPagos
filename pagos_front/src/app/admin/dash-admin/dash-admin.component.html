@@ -1,0 +1,48 @@
+<div class="min-h-screen flex flex-col lg:flex-row">
+    <!-- Menú lateral -->
+    <div class="flex flex-col w-full lg:w-64 bg-gray-800 text-white">
+        <div class="flex items-center justify-center h-20 bg-red-800 text-lg font-bold space-x-2">
+            <!-- Imagen del logo -->
+            <img src="img/logo_no_fondo.png" alt="PayFlow" class="h-20 w-auto" />
+            <span class="text-red-300">Admin</span>
+        </div>
+
+        <nav class="flex-1 px-2 py-4 space-y-1">
+            <!-- Enlace a Usuarios -->
+            <a routerLink="/admin-dashboard/usuarios"
+                class="group flex items-center px-2 py-2 text-sm font-medium rounded-md text-red-200 hover:bg-red-700 hover:text-white">
+                <fa-icon [icon]="['fas', 'users']" class="h-6 w-6 mr-3 text-red-300 group-hover:text-red-100"></fa-icon>
+                Usuarios
+            </a>
+
+            <!-- Enlace a Reportes -->
+            <a routerLink="/admin-dashboard/reportes"
+                class="group flex items-center px-2 py-2 text-sm font-medium rounded-md text-red-200 hover:bg-red-700 hover:text-white">
+                <fa-icon [icon]="['fas', 'chart-line']"
+                    class="h-6 w-6 mr-3 text-red-300 group-hover:text-red-100"></fa-icon>
+                Reportes
+            </a>
+
+            <!-- Enlace a Perfil -->
+            <a routerLink="/admin-dashboard/perfil/info"
+                class="group flex items-center px-2 py-2 text-sm font-medium rounded-md text-red-200 hover:bg-red-700 hover:text-white">
+                <fa-icon [icon]="['fas', 'user']" class="h-6 w-6 mr-3 text-red-300 group-hover:text-red-100"></fa-icon>
+                Perfil
+            </a>
+
+            <!-- Enlace para cerrar sesión -->
+            <a routerLink="/login"
+                class="group flex items-center px-2 py-2 text-sm font-medium rounded-md text-red-200 hover:bg-red-800 hover:text-white">
+                <fa-icon [icon]="['fas', 'arrow-right-from-bracket']"
+                    class="h-6 w-6 mr-3 text-red-400 group-hover:text-red-200"></fa-icon>
+                Cerrar sesión
+            </a>
+        </nav>
+    </div>
+
+    <!-- Contenido principal -->
+    <div class="flex-1 p-10 bg-gray-100">
+        <!-- Aquí puedes añadir más contenido o componentes -->
+        <router-outlet></router-outlet>
+    </div>
+</div>

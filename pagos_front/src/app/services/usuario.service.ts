@@ -10,6 +10,7 @@ export class UsuarioService {
   private baseUrl = environment.apiUrl + '/usuario/'; // URL base de la API
   private apiPublic = environment.apiUrl + '/usuario/public'; // URL base de la API
   private apiProtected = environment.apiUrl + '/usuario/protected'; // URL base de la API
+  private apiAdmin = environment.apiUrl + '/usuario/admin'; // URL base de la API
 
   constructor(private http: HttpClient) {}
 
@@ -18,6 +19,26 @@ export class UsuarioService {
     const url = `${this.apiPublic}/login`; // Agrega el endpoint específico
     const body = { email, password };
     return this.http.post(url, body);
+  }
+
+  crearUsuario(body: any): Observable<any> {
+    const url = `${this.apiPublic}/crearUsuario`; // Agrega el endpoint específico
+    return this.http.post(url, body);
+  }
+
+  crearAdmin(body: any): Observable<any> {
+    const url = `${this.apiAdmin}/crearAdmin`; // Agrega el endpoint específico
+    return this.http.post(url, body);
+  }
+
+  eliminarMiUsuario(body: any): Observable<any> {
+    const url = `${this.apiProtected}/eliminarMiUsuario`;
+    return this.http.request('DELETE', url, { body }); // Enviar el body en una solicitud DELETE
+  }
+
+  eliminarUsuarioParaAdmins(id: any): Observable<any> {
+    const url = `${this.apiAdmin}/eliminarUsuarioParaAdmins/${id}`;
+    return this.http.request('DELETE', url); // Enviar el body en una solicitud DELETE
   }
 
   // Método para editarPerfil
@@ -31,6 +52,13 @@ export class UsuarioService {
     const url = `${this.apiProtected}/getMiUsuario/${id}`; // URL con el ID del usuario
     return this.http.get(url); // Realiza la solicitud GET
   }
+
+
+  getUsuariosExceptoElMio(): Observable<any> {
+    const url = `${this.apiAdmin}/getUsuariosExceptoElMio`; // URL con el ID del usuario
+    return this.http.get(url); // Realiza la solicitud GET
+  }
+
 
   // Método para obtener la información del usuario por su ID
   cambiarPassword(body: any): Observable<any> {

@@ -5,6 +5,8 @@
 package ss1.api.services;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Objects;
 import javax.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -17,11 +19,13 @@ import ss1.api.excepciones.ConflictException;
 import ss1.api.excepciones.NotFoundException;
 import ss1.api.excepciones.UnauthorizedException;
 import ss1.api.models.Rol;
+import ss1.api.models.Saldo;
 import ss1.api.models.dto.LoginDTO;
 import ss1.api.models.Usuario;
 import ss1.api.models.dto.ExistEmailDTO;
 import ss1.api.models.request.EditarPasswordRequest;
 import ss1.api.models.request.EditarPerfilRequest;
+import ss1.api.models.request.EliminarMiUsuarioRequest;
 import ss1.api.models.request.LoginRequest;
 import ss1.api.repositories.RolRepository;
 import ss1.api.repositories.UsuarioRepository;
@@ -53,6 +57,30 @@ public class UsuarioService extends ss1.api.services.Service {
     private RolRepository rolRepository;
     @Autowired
     private SaldoService saldoService;
+
+    public List<Usuario> getUsuariosExceptoElMio() throws NotFoundException {
+        Usuario usuario = this.getUsuarioUseJwt();
+        return usuarioRepository.findAllExceptUser(usuario.getId());
+    }
+
+    public String eliminarUsuarioParaAdmins(Long usuarioId) throws BadRequestException,
+            ConflictException, NotFoundException, UnauthorizedException {
+        //obtener el usuario por el JWT
+        Usuario usuario = getUsuarioUseJwt();
+
+        boolean userAdmin = isUserAdmin(usuario.getEmail());
+
+        if (!userAdmin) {
+            throw new UnauthorizedException("No eres administrador.");
+        }
+
+        if (Objects.equals(usuario.getId(), usuarioId)) {
+            throw new UnauthorizedException("No puedes eliminar tu usuairo desde aqui.");
+
+        }
+        //mnadamos a eliminar
+        return this.eliminarUsuarioAbstraccion(new Usuario(usuarioId));
+    }
 
     /**
      * Inicia la sesión de un usuario autenticándolo con su email y contraseña.
@@ -140,11 +168,28 @@ public class UsuarioService extends ss1.api.services.Service {
      * @throws NotFoundException Si no se encuentra el rol "CLIENTE" en la base
      * de datos.
      */
+    @Transactional(rollbackOn = Exception.class)
     public LoginDTO crearUsuario(Usuario usuario) throws BadRequestException, ConflictException, NotFoundException {
         // Validar el modelo (esto asume que tienes un método para validar el modelo)
         validarModelo(usuario);
         Rol rol = this.rolRepository.findOneByNombre("CLIENTE").orElseThrow(
                 () -> new NotFoundException("Rol 'CLIENTE' no encontrado."));
+        usuario.setRol(rol);
+        usuario.setSaldo(new Saldo(0.0));
+        //guardamos el usuario
+        Usuario usuarioCreado = this.guardarUsuario(usuario);
+        // Generar el JWT para el usuario creado
+        UserDetails userDetails = authenticationService.loadUserByUsername(usuario.getEmail());
+        String jwt = jwtGenerator.generateToken(userDetails);
+        return new LoginDTO(usuarioCreado, jwt);
+    }
+
+    @Transactional(rollbackOn = Exception.class)
+    public LoginDTO crearAdmin(Usuario usuario) throws BadRequestException, ConflictException, NotFoundException {
+        // Validar el modelo (esto asume que tienes un método para validar el modelo)
+        validarModelo(usuario);
+        Rol rol = this.rolRepository.findOneByNombre("ADMIN").orElseThrow(
+                () -> new NotFoundException("Rol 'ADMIN' no encontrado."));
         usuario.setRol(rol);
         //guardamos el usuario
         Usuario usuarioCreado = this.guardarUsuario(usuario);
@@ -160,40 +205,21 @@ public class UsuarioService extends ss1.api.services.Service {
         return this.usuarioRepository.findById(usuarioId.getId()).orElseThrow(() -> new NotFoundException("Usuario no encontrado."));
     }
 
-    /**
-     * Elimina el usuario autenticado del sistema, si y solo si no tiene saldo
-     * disponible en su cuenta.
-     *
-     * Este método valida que el usuario esté autenticado y que el usuario a
-     * eliminar sea el mismo usuario autenticado. Antes de proceder con la
-     * eliminación, también verifica que el usuario no tenga saldo en su cuenta.
-     *
-     * Excepciones: - {@link BadRequestException}: Se lanza si hay un problema
-     * con la solicitud. - {@link ConflictException}: Se lanza si el usuario
-     * tiene saldo en su cuenta y no puede ser eliminado. -
-     * {@link NotFoundException}: Se lanza si el usuario no es encontrado en el
-     * sistema. - {@link UnauthorizedException}: Se lanza si el usuario
-     * autenticado no tiene los permisos necesarios para realizar esta
-     * operación.
-     *
-     * @param usuarioEliminar El objeto Usuario que contiene los datos del
-     * usuario que se intenta eliminar.
-     * @return Un mensaje que indica que el usuario ha sido eliminado
-     * exitosamente.
-     * @throws BadRequestException Si hay algún problema en la solicitud o datos
-     * inválidos.
-     * @throws ConflictException Si el usuario tiene saldo disponible en su
-     * cuenta.
-     * @throws NotFoundException Si el usuario a eliminar no existe.
-     * @throws UnauthorizedException Si el usuario autenticado no tiene
-     * autorización para realizar esta operación.
-     */
-    public String eliminarUsuario(Usuario usuarioEliminar) throws BadRequestException, ConflictException, NotFoundException, UnauthorizedException {
-        // Obtener el usuario que se intenta eliminar
-        Usuario usuario = this.getUsuarioById(usuarioEliminar);
-        // Verificar que el usuario autenticado coincide con el usuario que se intenta eliminar
-        this.verificarUsuarioJwt(usuario);
-        return this.eliminarUsuarioAbstraccion(usuarioEliminar);
+    public String eliminarMiUsuario(EliminarMiUsuarioRequest usuarioEliminar) throws BadRequestException,
+            ConflictException, NotFoundException, UnauthorizedException {
+        //obtener el usuario por el JWT
+        Usuario usuario = getUsuarioUseJwt();
+
+        //ahora con el encriptador verificamos que la password sea la misma
+        boolean comparacion = encriptador.compararPassword(
+                usuarioEliminar.getPassword(),
+                usuario.getPassword());
+
+        if (!comparacion) {
+            throw new UnauthorizedException("Password incorrecta");
+        }
+
+        return this.eliminarUsuarioAbstraccion(usuario);
     }
 
     /**
@@ -220,10 +246,6 @@ public class UsuarioService extends ss1.api.services.Service {
      */
     @Transactional(rollbackOn = Exception.class)
     private Usuario guardarUsuario(Usuario usuario) throws BadRequestException, ConflictException {
-        // Verificar si ya existe un usuario con el mismo NIT
-        if (usuarioRepository.findOneByNit(usuario.getNit()).isPresent()) {
-            throw new ConflictException("El NIT ya está en uso");
-        }
         // Verificar si ya existe un usuario con el mismo email
         if (usuarioRepository.findOneByEmail(usuario.getEmail()).isPresent()) {
             throw new ConflictException("El email ya está en uso");
@@ -279,7 +301,6 @@ public class UsuarioService extends ss1.api.services.Service {
         this.verificarUsuarioJwt(usuario);
         //si tiene permisos entonces debemos editar la informacion
 
-        usuario.setNit(usuarioEditar.getNit());
         usuario.setNombres(usuarioEditar.getNombres());
         usuario.setApellidos(usuarioEditar.getApellidos());
 
@@ -293,7 +314,8 @@ public class UsuarioService extends ss1.api.services.Service {
         Usuario usuario = this.getUsuarioById(usuarioEliminar);
 
         //verificar que no tenga fondos el usuario
-        if (this.saldoService.usuarioTieneSaldo(usuario) == true) {
+        if (!isUserAdmin(usuario.getEmail())
+                && this.saldoService.usuarioTieneSaldo(usuario) == true) {
             throw new ConflictException("El usuario tiene saldo disponible en su cuenta, no se puede eliminar.");
         }
         //eliminar el usuario

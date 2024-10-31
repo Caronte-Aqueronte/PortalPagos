@@ -4,8 +4,9 @@
  */
 package ss1.api.services;
 
-import javax.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Propagation;
 import ss1.api.models.TransaccionFallida;
 import ss1.api.repositories.TransaccionFallidaRepository;
 
@@ -25,7 +26,7 @@ public class TransaccionFallidaService extends Service {
      * @param transaccionFallida Objeto {@link TransaccionFallida} a guardar.
      * @return La transacción fallida guardada.
      */
-    @Transactional(rollbackOn = Exception.class)
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public TransaccionFallida guardarTransaccionFallida(TransaccionFallida transaccionFallida) {
         return transaccionFallidaRepository.save(transaccionFallida);
     }

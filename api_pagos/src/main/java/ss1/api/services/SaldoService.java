@@ -4,14 +4,22 @@
  */
 package ss1.api.services;
 
+import java.time.LocalDateTime;
+import javax.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import ss1.api.excepciones.NotFoundException;
 import ss1.api.excepciones.UnauthorizedException;
+import ss1.api.models.Recarga;
+import ss1.api.models.Retiro;
 import ss1.api.models.Saldo;
+import ss1.api.models.TransaccionFallida;
 import ss1.api.models.Usuario;
 import ss1.api.models.dto.SaldoDTO;
+import ss1.api.models.request.MovimientoExternoRequest;
 import ss1.api.repositories.SaldoRepository;
+import ss1.api.services.bancos.BancoService;
+import ss1.api.services.bancos.BancoServiceFactory;
 
 /**
  *
@@ -23,8 +31,16 @@ public class SaldoService extends Service {
     @Autowired
     private SaldoRepository saldoRepository;
     @Autowired
+    private RecargaService recargaService;
+    @Autowired
+    private RetiroService retiroService;
+    @Autowired
     @Lazy
     private UsuarioService usuarioService;
+    @Autowired
+    private TransaccionFallidaService transaccionFallidaService;
+    @Autowired
+    private BancoServiceFactory bancoServiceFactory;
 
     /**
      * Verifica si el usuario tiene saldo disponible.
@@ -60,7 +76,6 @@ public class SaldoService extends Service {
      * @param transferencia La cantidad de dinero a transferir.
      */
     public void transferirFondos(Usuario remitente, Usuario destinatario, Double transferencia) {
-        //restamos al saldo del remitente la transferencia
         remitente.getSaldo().setSaldoDisponible(
                 remitente.getSaldo().getSaldoDisponible() - transferencia
         );
@@ -87,5 +102,104 @@ public class SaldoService extends Service {
                 .orElseThrow(() -> new NotFoundException("Saldo no encontrado."));
         return new SaldoDTO(
                 this.manejadorMoneda.cantidadAFormatoRegional(saldo.getSaldoDisponible()));
+    }
+
+    @Transactional(rollbackOn = Exception.class)
+    public String recargarSaldo(MovimientoExternoRequest recargaRequest) {
+        //validar
+        validarModelo(recargaRequest);
+        try {
+            recargar(recargaRequest.getMonto(), recargaRequest.getBanco());
+            BancoService bancoService = bancoServiceFactory.getBancoService(recargaRequest.getBanco());
+            String token = bancoService.login(recargaRequest.getEmail(),
+                    recargaRequest.getPin());
+            bancoService.recargarDesdeBanco(token, recargaRequest.getMonto());
+            return "Se recargo el monto con exito.";
+        } catch (Exception ex) {
+            TransaccionFallida transaccionFallida = new TransaccionFallida(
+                    "N/A",
+                    LocalDateTime.now(),
+                    ex.getMessage(),
+                    recargaRequest.getMonto(),
+                    "Recarga desde banco",
+                    recargaRequest.getBanco(),
+                    recargaRequest.getEmail()
+            );
+            this.transaccionFallidaService.guardarTransaccionFallida(transaccionFallida);
+            throw ex;
+        }
+
+    }
+
+    @Transactional(rollbackOn = Exception.class)
+    public String retirarSaldo(MovimientoExternoRequest recargaRequest) {
+        //validar
+        validarModelo(recargaRequest);
+        try {
+            //retiramos el saldo
+            String retirar = retirar(recargaRequest.getMonto(), recargaRequest.getBanco(),
+                    recargaRequest.getEmail());
+            //si no hay ningun problema entonces mandamos el dinero al banco
+            BancoService bancoService = bancoServiceFactory.getBancoService(recargaRequest.getBanco());
+            String token = bancoService.login(recargaRequest.getEmail(),
+                    recargaRequest.getPin());
+            bancoService.retirarABanco(token, recargaRequest.getMonto());
+            return "Se retiro el monto con exito.";
+        } catch (Exception ex) {
+
+            TransaccionFallida transaccionFallida = new TransaccionFallida(
+                    "N/A",
+                    LocalDateTime.now(),
+                    ex.getMessage(),
+                    recargaRequest.getMonto(),
+                    "Retiro a banco",
+                    recargaRequest.getBanco(),
+                    recargaRequest.getEmail()
+            );
+            this.transaccionFallidaService.guardarTransaccionFallida(transaccionFallida);
+
+            throw ex;
+        }
+    }
+
+    @Transactional(rollbackOn = Exception.class)
+    private String recargar(Double montoRecarga, String entidadFinanciera) throws NotFoundException {
+        //traer el usuario
+        Usuario usuario = usuarioService.getUsuarioUseJwt();
+        //sumarle el saldo al usuario
+        usuario.getSaldo().setSaldoDisponible(
+                usuario.getSaldo().getSaldoDisponible() + montoRecarga);
+        //crear la recarga
+        recargaService.guardarRecarga(new Recarga(usuario,
+                montoRecarga, entidadFinanciera));
+        //guardar la actualizacion del usuario
+        usuarioService.getUsuarioRepository().save(usuario);
+        return "Se recargo con exito.";
+    }
+
+    @Transactional(rollbackOn = Exception.class)
+    private String retirar(Double montoRetiro, String entidadFinanciera,
+            String cuentaDestino) throws NotFoundException,
+            UnauthorizedException {
+
+        //traer el usuario
+        Usuario usuario = usuarioService.getUsuarioUseJwt();
+        //verificar si el usuario tiene suficiente dinero
+        boolean tieneSuficienteSaldo
+                = usuarioTieneSaldoSuficiente(usuario, montoRetiro);
+
+        if (!tieneSuficienteSaldo) {
+            throw new UnauthorizedException("Saldo insuficiente.");
+        }
+
+        //sumarle el saldo al usuario
+        usuario.getSaldo().setSaldoDisponible(usuario.getSaldo().getSaldoDisponible() - montoRetiro);
+        //crear el retiro
+        retiroService.guardarRetiro(new Retiro(usuario,
+                montoRetiro, cuentaDestino, entidadFinanciera
+        ));
+        //guardar la actualizacion del usuario
+        usuarioService.getUsuarioRepository().save(usuario);
+        return "Se retiro con exito.";
     }
 }

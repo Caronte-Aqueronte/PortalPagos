@@ -1,0 +1,141 @@
+<div class="p-6">
+    <!-- Título y botón de agregar administrador -->
+    <div class="flex flex-col md:flex-row items-center justify-between mb-6">
+        <h2 class="text-2xl font-bold text-gray-800">Usuarios</h2>
+        <button (click)="openAdminPopup()"
+            class="mt-4 md:mt-0 bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <fa-icon [icon]="['fas', 'user-plus']" class="mr-2"></fa-icon>
+            Crear Administrador
+        </button>
+    </div>
+
+    <!-- Tabla de empleados -->
+    <div class="overflow-x-auto">
+        <table class="min-w-full bg-white shadow-md rounded-lg overflow-hidden">
+            <thead>
+                <tr class="bg-gray-100 text-gray-600 uppercase text-sm leading-normal">
+                    <th class="py-3 px-6 text-left">Nombre</th>
+                    <th class="py-3 px-6 text-left">Correo</th>
+                    <th class="py-3 px-6 text-center">Rol</th>
+                    <th class="py-3 px-6 text-center">Acciones</th>
+                </tr>
+            </thead>
+            <tbody class="text-gray-700 text-sm font-light">
+                <tr *ngFor="let empleado of empleados" class="border-b border-gray-200 hover:bg-gray-50">
+                    <td class="py-3 px-6 text-left whitespace-nowrap">
+                        <div class="flex items-center">
+                            <fa-icon [icon]="['fas', 'user']" class="h-5 w-5 text-gray-400 mr-2"></fa-icon>
+                            <span>{{ empleado.nombres + " " + empleado.apellidos }}</span>
+                        </div>
+                    </td>
+                    <td class="py-3 px-6 text-left">
+                        <span>{{ empleado.email }}</span>
+                    </td>
+                    <td class="py-3 px-6 text-center">
+                        <span class="py-1 px-3 rounded-full text-xs" [ngClass]="{
+                              'bg-yellow-200 text-yellow-800': empleado.rol.nombre === 'ADMIN',
+                              'bg-green-200 text-green-800': empleado.rol.nombre !== 'ADMIN'
+                            }">
+                            {{ empleado.rol.nombre }}
+                        </span>
+                    </td>
+                    <td class="py-3 px-6 text-center">
+                        <button (click)="eliminarEmpleado(empleado.id)"
+                            class="bg-red-500 text-white px-2 py-1 rounded-full hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500">
+                            <fa-icon [icon]="['fas', 'trash']"></fa-icon>
+                        </button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Popup de crear administrador -->
+    <div class="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center z-50 p-4"
+        *ngIf="showAdminPopup">
+        <div class="bg-white p-6 rounded-lg shadow-lg max-w-md w-full relative">
+
+            <!-- Botón de cerrar -->
+            <button class="absolute top-2 right-2 text-gray-500 hover:text-gray-700" (click)="closeAdminPopup()">
+                <fa-icon [icon]="['fas', 'times']" class="h-6 w-6"></fa-icon>
+            </button>
+
+            <!-- Título del formulario -->
+            <h2 class="text-3xl font-semibold text-center text-gray-500 mb-6">Crear Administrador</h2>
+
+            <form [formGroup]="createAdminForm" (ngSubmit)="crearAdmin()">
+                <!-- Campo Email -->
+                <div class="mb-4">
+                    <label for="email" class="block text-sm font-medium text-gray-500">Correo Electrónico</label>
+                    <input type="email" id="email" formControlName="email" required
+                        class="appearance-none block w-full px-4 py-3 border border-gray-400 rounded-md bg-transparent placeholder-gray-400 text-gray-600 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                    <div *ngIf="createAdminForm.get('email')?.invalid && createAdminForm.get('email')?.touched"
+                        class="text-red-400 text-xs mt-1">
+                        <p *ngIf="createAdminForm.get('email')?.errors?.['required']">El email no puede estar vacío.</p>
+                        <p *ngIf="createAdminForm.get('email')?.errors?.['email']">Debe ser un correo válido.</p>
+                        <p *ngIf="createAdminForm.get('email')?.errors?.['maxlength']">Máximo 250 caracteres.</p>
+                    </div>
+                </div>
+
+                <!-- Campo Nombres -->
+                <div class="mb-4">
+                    <label for="nombres" class="block text-sm font-medium text-gray-500">Nombres</label>
+                    <input type="text" id="nombres" formControlName="nombres" required
+                        class="appearance-none block w-full px-4 py-3 border border-gray-400 rounded-md bg-transparent placeholder-gray-400 text-gray-600 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                    <div *ngIf="createAdminForm.get('nombres')?.invalid && createAdminForm.get('nombres')?.touched"
+                        class="text-red-400 text-xs mt-1">
+                        <p *ngIf="createAdminForm.get('nombres')?.errors?.['required']">Campo requerido.</p>
+                        <p *ngIf="createAdminForm.get('nombres')?.errors?.['maxlength']">Máximo 250 caracteres.</p>
+                    </div>
+                </div>
+
+                <!-- Campo Apellidos -->
+                <div class="mb-4">
+                    <label for="apellidos" class="block text-sm font-medium text-gray-500">Apellidos</label>
+                    <input type="text" id="apellidos" formControlName="apellidos" required
+                        class="appearance-none block w-full px-4 py-3 border border-gray-400 rounded-md bg-transparent placeholder-gray-400 text-gray-600 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                    <div *ngIf="createAdminForm.get('apellidos')?.invalid && createAdminForm.get('apellidos')?.touched"
+                        class="text-red-400 text-xs mt-1">
+                        <p *ngIf="createAdminForm.get('apellidos')?.errors?.['required']">Campo requerido.</p>
+                        <p *ngIf="createAdminForm.get('apellidos')?.errors?.['maxlength']">Máximo 250 caracteres.</p>
+                    </div>
+                </div>
+
+                <!-- Campo Contraseña -->
+                <div class="mb-4">
+                    <label for="password" class="block text-sm font-medium text-gray-500">Contraseña</label>
+                    <input type="password" id="password" formControlName="password" required
+                        class="appearance-none block w-full px-4 py-3 border border-gray-400 rounded-md bg-transparent placeholder-gray-400 text-gray-600 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                    <div *ngIf="createAdminForm.get('password')?.invalid && createAdminForm.get('password')?.touched"
+                        class="text-red-400 text-xs mt-1">
+                        <p *ngIf="createAdminForm.get('password')?.errors?.['required']">Campo requerido.</p>
+                        <p *ngIf="createAdminForm.get('password')?.errors?.['maxlength']">Máximo 250 caracteres.</p>
+                    </div>
+                </div>
+
+                <!-- Confirmar Contraseña -->
+                <div class="mb-6">
+                    <label for="confirmPassword" class="block text-sm font-medium text-gray-500">Confirmar
+                        Contraseña</label>
+                    <input type="password" id="confirmPassword" formControlName="confirmPassword" required
+                        class="appearance-none block w-full px-4 py-3 border border-gray-400 rounded-md bg-transparent placeholder-gray-400 text-gray-600 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                    <div *ngIf="!passwordsMatch() && createAdminForm.get('confirmPassword')?.touched"
+                        class="text-red-400 text-xs mt-1">
+                        <p>Las contraseñas no coinciden.</p>
+                    </div>
+                </div>
+
+                <!-- Botón Crear Cuenta -->
+                <div class="flex justify-center mt-6">
+                    <button type="submit"
+                        class="w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-gray-400 disabled:cursor-not-allowed disabled:opacity-50"
+                        [disabled]="createAdminForm.invalid || !passwordsMatch()">
+                        <fa-icon [icon]="['fas', 'user-plus']" class="mr-2"></fa-icon>
+                        Crear Administrador
+                    </button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>

@@ -9,11 +9,16 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Random;
 import javax.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
+import ss1.api.excepciones.BadRequestException;
 import ss1.api.excepciones.ConflictException;
 import ss1.api.excepciones.NotFoundException;
 import ss1.api.excepciones.UnauthorizedException;
@@ -23,6 +28,7 @@ import ss1.api.models.Usuario;
 import ss1.api.models.dto.TransaccionDTO;
 import ss1.api.models.request.PagoExternoRequest;
 import ss1.api.models.request.PagoRequest;
+import ss1.api.reportes.printers.ComprobantePrinter;
 import ss1.api.repositories.TransaccionRepository;
 import ss1.api.tools.ManejadorTiempo;
 
@@ -38,6 +44,20 @@ public class TransaccionService extends Service {
     @Value("${externo.servicio.urlTiendaB}")
     private String urlTiendaB;
 
+    //temporal
+    String[] domains = {
+        "amazon.com",
+        "ebay.com",
+        "alibaba.com",
+        "etsy.com",
+        "walmart.com",
+        "mercadolibre.com",
+        "shopify.com",
+        "rakuten.com",
+        "target.com",
+        "bestbuy.com"
+    };
+
     @Autowired
     private TransaccionRepository transaccionRepository;
     @Autowired
@@ -48,6 +68,8 @@ public class TransaccionService extends Service {
     private SaldoService saldoService;
     @Autowired
     private TransaccionFallidaService transaccionFallidaService;
+    @Autowired
+    private ComprobantePrinter comprobantePrinter;
 
     /**
      * Procesa un pago entre un emisor y un receptor. Verifica si el emisor
@@ -68,48 +90,52 @@ public class TransaccionService extends Service {
         validarModelo(pago);
         //debemos traer el usuario que desea realizar el pago
         Usuario emisor = usuarioService.getUsuarioUseJwt();
-        //traer el usuario destinatario
-        Usuario receptor = usuarioService.getByEmail(pago.getCorreoReceptor());
+        try {
 
-        //verificar que el receptor no sea le mismo que el emisor
-        if (Objects.equals(emisor.getId(), receptor.getId())) {
-            throw new ConflictException("No puedes transferirte a ti mismo.");
-        }
+            //traer el usuario destinatario
+            Usuario receptor = usuarioService.getByEmail(pago.getCorreoReceptor());
 
-        //verificamos que el usuario tenga salgo
-        boolean usuarioTieneSaldo = saldoService.usuarioTieneSaldo(emisor);
-        boolean usuarioTieneSaldoSuficiente = saldoService.usuarioTieneSaldoSuficiente(receptor,
-                pago.getCantidad());
+            //verificar que el receptor no sea le mismo que el emisor
+            if (Objects.equals(emisor.getId(), receptor.getId())) {
+                throw new ConflictException("No puedes transferirte a ti mismo.");
+            }
 
-        if (!usuarioTieneSaldo || !usuarioTieneSaldoSuficiente) {
+            //verificamos que el usuario tenga salgo
+            boolean usuarioTieneSaldo = saldoService.usuarioTieneSaldo(emisor);
 
-            TransaccionFallida transaccionFallida = new TransaccionFallida(
-                    emisor,
-                    LocalDateTime.now(),
-                    "Usuario sin fondos",
+            boolean usuarioTieneSaldoSuficiente = saldoService.usuarioTieneSaldoSuficiente(emisor,
+                    pago.getCantidad());
+
+            if (!usuarioTieneSaldo || !usuarioTieneSaldoSuficiente) {
+                throw new ConflictException("Usuario sin fondos.");
+            }
+            //si el usuario tiene fondos entonces debemos transeferir los fondos al destinatario
+            saldoService.transferirFondos(emisor, receptor, pago.getCantidad());
+            //debemos persistir a los dos usuarios ahora
+            usuarioService.getUsuarioRepository().save(emisor);
+            usuarioService.getUsuarioRepository().save(receptor);
+
+            //debemos crear la transaccion
+            Transaccion transaccion = new Transaccion(
                     pago.getCantidad(),
-                    "TRANSFERENCIA",
+                    pago.getConcepto(), receptor,
+                    emisor);
+
+            //persistir la transaccion
+            return transaccionRepository.save(transaccion);
+        } catch (BadRequestException | ConflictException | NotFoundException ex) {
+            TransaccionFallida transaccionFallida = new TransaccionFallida(
+                    emisor.getEmail(),
+                    LocalDateTime.now(),
+                    ex.getMessage(),
+                    pago.getCantidad(),
+                    "Pago",
                     "N/A",
-                    receptor.getEmail()
+                    pago.getCorreoReceptor()
             );
             this.transaccionFallidaService.guardarTransaccionFallida(transaccionFallida);
-            throw new ConflictException("Usuario sin fondos.");
+            throw ex;
         }
-        //si el usuario tiene fondos entonces debemos transeferir los fondos al destinatario
-        saldoService.transferirFondos(emisor, receptor, pago.getCantidad());
-
-        //debemos persistir a los dos usuarios ahora
-        usuarioService.getUsuarioRepository().save(emisor);
-        usuarioService.getUsuarioRepository().save(receptor);
-
-        //debemos crear la transaccion
-        Transaccion transaccion = new Transaccion(
-                pago.getCantidad(),
-                pago.getConcepto(), receptor,
-                emisor);
-
-        //persistir la transaccion
-        return transaccionRepository.save(transaccion);
     }
 
     @Transactional(rollbackOn = Exception.class)
@@ -123,28 +149,74 @@ public class TransaccionService extends Service {
 
     @Transactional(rollbackOn = Exception.class)
     public byte[] pagarGetComprobante(PagoExternoRequest pago) throws NotFoundException,
-            ConflictException {
+            ConflictException, Exception {
         validarModelo(pago);
-        Transaccion guardarTransaccion = procesarPago(pago);
+        byte[] imagenTienda;
+        Usuario emisor = usuarioService.getUsuarioUseJwt();
 
         // Inicializar el RestTemplate para realizar la solicitud GET
         RestTemplate restTemplate = new RestTemplate();
         String url;
 
-        //mandar a traer la informacion de la tienda segun su identificadorF
-        switch (pago.getIdentificadorTienda()) {
-            case "a":
-                url = urlTiendaA;
-                break;
-            case "b":
-                url = urlTiendaB;
-            default:
-                throw new NotFoundException("Tienda no reconocida.");
+        //TEMPORAL OBTENCION DE UN LOGO EN SERVICIO EXTERNO
+        Random random = new Random();
+        int randomIndex = random.nextInt(domains.length);
+        try {
+            //mandar a traer la informacion de la tienda segun su identificadorF
+            switch (pago.getIdentificadorTienda()) {
+                case "a":
+                    url = urlTiendaA + "electric-shop/api/v1/public/company";
+                    break;
+                case "b":
+                    url = urlTiendaB + "/" + domains[randomIndex];
+                    break;
+                default:
+                    throw new NotFoundException("Tienda no reconocida.");
 
+            }
+
+            String urlImagen;
+
+            //mandar a traer la info de la tienda haciendo get a el url
+            ResponseEntity<Map> response = restTemplate.getForEntity(url, Map.class);
+            //si la respuesta esta bien entonces extraemos el nombre de la plataforma y el link de la imagen
+            if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null
+                    && response.getBody().get("image") != null) {
+                urlImagen = response.getBody().get("image").toString();
+            } else {
+
+                throw new NotFoundException("No se pudo obtener la informacion de la tienda.");
+            }
+
+            ResponseEntity<byte[]> responseImagen = restTemplate.getForEntity(urlImagen, byte[].class);
+            if (responseImagen.getStatusCode() == HttpStatus.OK && responseImagen.getBody() != null) {
+                imagenTienda = responseImagen.getBody();
+            } else {
+
+                throw new NotFoundException("No se pudo obtener la imagen de la tienda.");
+            }
+        } catch (Exception e) {
+            TransaccionFallida transaccionFallida = new TransaccionFallida(
+                    emisor.getEmail(),
+                    LocalDateTime.now(),
+                    e.getMessage(),
+                    pago.getCantidad(),
+                    "Pago desde tienda",
+                    pago.getNombreTienda(),
+                    pago.getCorreoReceptor()
+            );
+            this.transaccionFallidaService.guardarTransaccionFallida(transaccionFallida);
+            throw e;
         }
 
-        //mandamos a traer la imagen de la tienda
-        return null;
+        //procesar el pago
+        Transaccion guardarTransaccion = procesarPago(pago);
+
+        //mandamos a imprimir el comprobante de pago y retornamos
+        return this.comprobantePrinter.init(
+                constuirTransaccionDTO(guardarTransaccion),
+                pago.getNombreTienda(),
+                imagenTienda);
     }
 
     /**

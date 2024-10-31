@@ -15,6 +15,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -40,22 +41,12 @@ import org.hibernate.annotations.DynamicUpdate;
 public class Usuario extends Auditor {
 
     /**
-     * El NIT del usuario. Este campo es obligatorio, debe ser único y tiene
-     * entre 6 y 12 caracteres. El valor máximo de almacenamiento es de 13
-     * caracteres.
-     */
-    @NotBlank(message = "El nit del cliente no puede estar vacío.")
-    @NotNull(message = "El nit del cliente no puede ser nulo")
-    @Size(min = 6, max = 12, message = "El nit del cliente debe tener entre 6 y 12 caracteres.")
-    @Column(length = 13, unique = true, nullable = false)
-    private String nit;
-
-    /**
      * El email del usuario. Es obligatorio y debe tener entre 1 y 250
      * caracteres.
      */
     @NotBlank(message = "El email del cliente no puede estar vacío.")
     @NotNull(message = "El email del cliente no puede ser nulo")
+    @Email(message = "El email debe ser un correo electrónico válido.")
     @Size(min = 1, max = 250, message = "El email del cliente debe tener entre 1 y 250 caracteres.")
     @Column(length = 250)
     private String email;
@@ -139,15 +130,11 @@ public class Usuario extends Auditor {
     @Schema(hidden = true)
     private List<Retiro> retirosEfectivo;
 
-    /**
-     * Las transacciones fallidas asociadas al usuario. La relación es uno a
-     * muchos, donde un usuario puede tener varios fallos.
-     */
     @OneToMany(mappedBy = "usuario", orphanRemoval = true)
     @Cascade(org.hibernate.annotations.CascadeType.ALL)
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @Schema(hidden = true)
-    private List<TransaccionFallida> transaccionesFallidas;
+    private List<Recarga> recargas;
 
     /**
      * Constructor para inicializar un objeto Usuario con todos los atributos.
@@ -159,8 +146,7 @@ public class Usuario extends Auditor {
      * @param password la contraseña del usuario
      * @param rol el rol asociado al usuario
      */
-    public Usuario(String nit, String email, String nombres, String apellidos, String password, Rol rol) {
-        this.nit = nit;
+    public Usuario(String email, String nombres, String apellidos, String password, Rol rol) {
         this.email = email;
         this.nombres = nombres;
         this.apellidos = apellidos;
@@ -176,24 +162,6 @@ public class Usuario extends Auditor {
      * Constructor por defecto para la clase Usuario.
      */
     public Usuario() {
-    }
-
-    /**
-     * Obtiene el NIT del usuario.
-     *
-     * @return el NIT del usuario
-     */
-    public String getNit() {
-        return nit;
-    }
-
-    /**
-     * Establece el NIT del usuario.
-     *
-     * @param nit el NIT a establecer
-     */
-    public void setNit(String nit) {
-        this.nit = nit;
     }
 
     /**
@@ -328,14 +296,6 @@ public class Usuario extends Auditor {
         this.retirosEfectivo = retirosEfectivo;
     }
 
-    public List<TransaccionFallida> getTransaccionesFallidas() {
-        return transaccionesFallidas;
-    }
-
-    public void setTransaccionesFallidas(List<TransaccionFallida> transaccionesFallidas) {
-        this.transaccionesFallidas = transaccionesFallidas;
-    }
-
     public List<Transaccion> getTransaccionesEmitidas() {
         return transaccionesEmitidas;
     }
@@ -350,6 +310,14 @@ public class Usuario extends Auditor {
 
     public void setTransaccionesRecibidas(List<Transaccion> transaccionesRecibidas) {
         this.transaccionesRecibidas = transaccionesRecibidas;
+    }
+
+    public List<Recarga> getRecargas() {
+        return recargas;
+    }
+
+    public void setRecargas(List<Recarga> recargas) {
+        this.recargas = recargas;
     }
 
 }

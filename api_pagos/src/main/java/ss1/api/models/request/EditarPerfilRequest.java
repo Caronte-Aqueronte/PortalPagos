@@ -20,11 +20,6 @@ public class EditarPerfilRequest {
     @NotNull(message = "El id del cliente no puede ser nulo")
     private Long id;
 
-    @NotBlank(message = "El nit del cliente no puede estar vacío.")
-    @NotNull(message = "El nit del cliente no puede ser nulo")
-    @Size(min = 6, max = 12, message = "El nit del cliente debe tener entre 6 y 12 caracteres.")
-    private String nit;
-
     @NotBlank(message = "Los nombres del cliente no puede estar vacío.")
     @Size(min = 1, max = 250, message = "Los nombres del cliente debe tener entre 1 y 250 caracteres.")
     @Column(length = 250)
@@ -34,9 +29,8 @@ public class EditarPerfilRequest {
     @Size(min = 1, max = 250, message = "Los apellidos del cliente debe tener entre 1 y 250 caracteres.")
     private String apellidos;
 
-    public EditarPerfilRequest(Long id, String nit, String nombres, String apellidos) {
+    public EditarPerfilRequest(Long id, String nombres, String apellidos) {
         this.id = id;
-        this.nit = nit;
         this.nombres = nombres;
         this.apellidos = apellidos;
     }
@@ -50,14 +44,6 @@ public class EditarPerfilRequest {
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public String getNit() {
-        return nit;
-    }
-
-    public void setNit(String nit) {
-        this.nit = nit;
     }
 
     public String getNombres() {

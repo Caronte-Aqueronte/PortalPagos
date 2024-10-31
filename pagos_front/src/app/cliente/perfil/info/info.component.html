@@ -32,17 +32,6 @@
                     </div>
                 </div>
 
-                <!-- NIT -->
-                <div>
-                    <label for="nit" class="block text-sm font-medium text-gray-700">NIT</label>
-                    <input id="nit" formControlName="nit" type="text"
-                        class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
-                    <div *ngIf="profileForm.get('nit')?.invalid && profileForm.get('nit')?.touched"
-                        class="text-red-600 text-sm">
-                        El NIT debe tener entre 6 y 12 caracteres.
-                    </div>
-                </div>
-
                 <!-- Email (solo lectura) -->
                 <div>
                     <label for="email" class="block text-sm font-medium text-gray-700">Correo Electrónico</label>

@@ -1,0 +1,24 @@
+<li class="flex flex-wrap justify-between items-center bg-gray-100 p-4 rounded-lg">
+    <div class="flex items-center space-x-4">
+        <fa-icon [icon]="['fas', 'hand-holding-usd']" class="h-6 w-6 text-red-500"></fa-icon>
+        <div class="w-full md:w-auto">
+            <!-- Usuario y cuenta destino -->
+            <p class="text-sm font-semibold text-gray-700 truncate">{{ retiro.usuarioEmail }}</p>
+            <p class="text-xs text-gray-500 truncate w-48 md:w-auto">{{ retiro.cuentaDestino }} - {{
+                retiro.entidadFinanciera }}</p>
+            <!-- Fecha del retiro -->
+            <p class="text-xs text-gray-500">{{ retiro.fechaRetiro }}</p>
+        </div>
+    </div>
+    <div class="flex flex-col text-right space-y-1 md:space-y-0 md:flex-row md:items-center md:space-x-6">
+        <!-- Monto retirado -->
+        <p class="text-lg font-semibold text-red-600">
+            - Q{{ retiro.montoRetirado }}
+        </p>
+        <!-- Comision y monto final transferido -->
+        <div class="text-xs text-gray-500 md:text-right">
+            <p>Comisión: Q{{ retiro.comision }}</p>
+            <p>Monto final: Q{{ retiro.montoFinalTransferido }}</p>
+        </div>
+    </div>
+</li>

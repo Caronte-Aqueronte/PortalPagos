@@ -48,14 +48,6 @@ export class InfoComponent implements OnInit {
           Validators.maxLength(250),
         ],
       ],
-      nit: [
-        '',
-        [
-          Validators.required,
-          Validators.minLength(6),
-          Validators.maxLength(12),
-        ],
-      ],
       email: [{ value: '', disabled: true }],
     });
   }
@@ -74,7 +66,6 @@ export class InfoComponent implements OnInit {
         this.profileForm.patchValue({
           nombres: response.nombres,
           apellidos: response.apellidos,
-          nit: response.nit,
           email: response.email, // Aunque el email está deshabilitado, lo llenamos igual
         });
       },

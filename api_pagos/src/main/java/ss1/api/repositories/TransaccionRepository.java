@@ -73,4 +73,12 @@ public interface TransaccionRepository extends CrudRepository<Transaccion, Long>
             @Param("usuarioId") Long usuarioId,
             @Param("fechaInicio") Date fechaInicio,
             @Param("fechaFin") Date fechaFin);
+
+    @Query("SELECT t FROM Transaccion t WHERE "
+            + "(:fechaInicio IS NULL OR DATE(t.createdAt) >= :fechaInicio) "
+            + "AND (:fechaFin IS NULL OR DATE(t.createdAt)  <= :fechaFin) "
+            + "ORDER BY t.createdAt DESC")
+    public List<Transaccion> findByFechaBetween(
+            @Param("fechaInicio") Date fechaInicio,
+            @Param("fechaFin") Date fechaFin);
 }
