@@ -44,20 +44,6 @@ public class TransaccionService extends Service {
     @Value("${externo.servicio.urlTiendaB}")
     private String urlTiendaB;
 
-    //temporal
-    String[] domains = {
-        "amazon.com",
-        "ebay.com",
-        "alibaba.com",
-        "etsy.com",
-        "walmart.com",
-        "mercadolibre.com",
-        "shopify.com",
-        "rakuten.com",
-        "target.com",
-        "bestbuy.com"
-    };
-
     @Autowired
     private TransaccionRepository transaccionRepository;
     @Autowired
@@ -159,8 +145,6 @@ public class TransaccionService extends Service {
         String url;
 
         //TEMPORAL OBTENCION DE UN LOGO EN SERVICIO EXTERNO
-        Random random = new Random();
-        int randomIndex = random.nextInt(domains.length);
         try {
             //mandar a traer la informacion de la tienda segun su identificadorF
             switch (pago.getIdentificadorTienda()) {
@@ -168,7 +152,7 @@ public class TransaccionService extends Service {
                     url = urlTiendaA + "electric-shop/api/v1/public/company";
                     break;
                 case "b":
-                    url = urlTiendaB + "/" + domains[randomIndex];
+                    url = urlTiendaB + "mens-style/api/public/company";
                     break;
                 default:
                     throw new NotFoundException("Tienda no reconocida.");
