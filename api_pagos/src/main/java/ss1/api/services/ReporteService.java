@@ -52,7 +52,7 @@ public class ReporteService {
 
         // Caso 4: rol y usuarioEstado NO son nulos o vacíos
         // -> mostrar usuarios según rol y estado (eliminados o no)
-        if ("eliminado".equalsIgnoreCase(usuarioEstado)) {
+        if ("Eliminados".equalsIgnoreCase(usuarioEstado)) {
             return usuarioRepository.findAllByRol_NombreAndDeletedAtIsNotNull(rol);
         } else {
             return usuarioRepository.findAllByRol_NombreAndDeletedAtIsNull(rol);

@@ -33,7 +33,7 @@ public class BancoCreditoService implements BancoService {
         String url = urlBancoCredito + "/tarjeta-credito/v1/auth/login";
 
         Map<String, String> body = new HashMap<>();
-        body.put("correo", email);
+        body.put("correo_electronico", email);
         body.put("pin", pin);
 
         HttpHeaders headers = new HttpHeaders();
@@ -52,14 +52,14 @@ public class BancoCreditoService implements BancoService {
 
     @Override
     public boolean recargarDesdeBanco(String token, Double monto) throws UnauthorizedException {
-        String url = urlBancoCredito + "/tarjeta-credito/v1/tarjeta/generar-credito";
-        return realizarTransaccion(token, monto, url, "saldo_a_comprar");
+        String url = urlBancoCredito + "/tarjeta-credito/v1/tarjeta/generar-debito";
+        return realizarTransaccion(token, monto, url, "monto");
     }
 
     @Override
     public boolean retirarABanco(String token, Double monto) throws UnauthorizedException {
-        String url = urlBancoCredito + "/tarjeta-credito/v1/tarjeta/aumentar-credito";
-        return realizarTransaccion(token, monto, url, "saldo_a_acreditar");
+        String url = urlBancoCredito + "/tarjeta-credito/v1/tarjeta/generar-credito";
+        return realizarTransaccion(token, monto, url, "monto");
     }
 
     private boolean realizarTransaccion(String token, Double monto, String url, String saldoKey) throws UnauthorizedException {
@@ -67,6 +67,7 @@ public class BancoCreditoService implements BancoService {
         RestTemplate restTemplate = new RestTemplate();
 
         body.put(saldoKey, monto);
+        body.put("nombre_pasarela", "PayFlow");
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
